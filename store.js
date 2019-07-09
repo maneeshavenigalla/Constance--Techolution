@@ -355,22 +355,13 @@ const searchHotels = destination => {
     // let hotels = Array(5).fill({});
     // hotels =
     hotelDetails.map(hotel => {
-      console.log(hotel);
       return {
         name: hotel.hotelName,
         Location: hotel.Location,
         rating: hotel.Rating,
-        image: hotel.image
+        image: hotel.image,
+        description: hotel.description
       };
-      // return {
-      //   name: hotel.name,
-      //   location: hotel.Location,
-      //   rating: Math.ceil(Math.random() * 5),
-      //   numberOfReviews: Math.floor(Math.random() * 5000) + 1,
-      //   priceStarting: Math.floor(Math.random() * 450) + 80,
-      //   image:
-      //     "https://cdn1-www.dogtime.com/assets/uploads/2011/03/puppy-development.jpg"
-      // };
     });
     // hotelDetails.sort((a, b) => {
     //   return a.priceStarting - b.priceStarting;
