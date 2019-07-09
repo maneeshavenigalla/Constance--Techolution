@@ -67,12 +67,48 @@ bot.on("conversationUpdate", message => {
   }
 });
 
+// Greetings
+
+bot
+  .dialog("Greetings", session => {
+    var msg = new builder.Message(session)
+      .text("How can I assist you today?")
+      .suggestedActions(
+        builder.SuggestedActions.create(session, [
+          builder.CardAction.imBack(session, "Hotel Booking", "Hotel Booking"),
+          builder.CardAction.imBack(session, "Services", "Services"),
+          builder.CardAction.imBack(session, "Leisure", "Leisure")
+        ])
+      );
+    session.send(msg);
+  })
+  .triggerAction({
+    matches: "Greetings"
+  });
+
+//Purpose of the trip
+
+bot
+  .dialog("Purpose", (session, args, next) => {
+    var purpose = new builder.Message(session)
+      .text("What is the purpose of your visit?")
+      .suggestedActions(
+        builder.SuggestedActions.create(session, [
+          builder.CardAction.imBack(session, "Business", "Business"),
+          builder.CardAction.imBack(session, "Personal", "Personal")
+        ])
+      );
+    session.send(purpose);
+  })
+  .triggerAction({
+    matches: "Purpose"
+  });
+
 bot
   .dialog("SearchHotels", [
     (session, args, next) => {
-      session.send(
-        `Welcome to the Hotels finder! We are analyzing your message: 'session.message.text'`
-      );
+      session.send("Thank you for choosing");
+      console.log("session", session);
       // try extracting entities
       const cityEntity = builder.EntityRecognizer.findEntity(
         args.intent.entities,
@@ -92,7 +128,7 @@ bot
         next({ response: airportEntity.entity });
       } else {
         // no entities detected, ask user for a destination
-        builder.Prompts.text(session, "Please enter your destination");
+        builder.Prompts.text(session, "Please select your preferred location!");
       }
     },
     (session, results) => {
@@ -145,16 +181,6 @@ bot
     matches: "ShowHotelsReviews"
   });
 
-bot
-  .dialog("Help", session => {
-    session.endDialog(
-      `Hi! Try asking me things like 'search hotels in Seattle', 'search hotels near LAX airport' or 'show me the reviews of The Bot Resort'`
-    );
-  })
-  .triggerAction({
-    matches: "Help"
-  });
-
 // Spell Check
 if (process.env.IS_SPELL_CORRECTION_ENABLED === "true") {
   bot.use({
@@ -175,24 +201,23 @@ if (process.env.IS_SPELL_CORRECTION_ENABLED === "true") {
 
 // Helpers
 const hotelAsAttachment = hotel => {
-  return new builder.HeroCard()
-    .title(hotel.name)
-    .subtitle(
-      "%d stars. %d reviews. From $%d per night.",
-      hotel.rating,
-      hotel.numberOfReviews,
-      hotel.priceStarting
-    )
-    .images([new builder.CardImage().url(hotel.image)])
-    .buttons([
-      new builder.CardAction()
-        .title("More details")
-        .type("openUrl")
-        .value(
-          "https://www.bing.com/search?q=hotels+in+" +
-            encodeURIComponent(hotel.location)
-        )
-    ]);
+  return (
+    new builder.HeroCard()
+      .title(hotel.name)
+      // .subtitle(
+      //   "%d stars. %d reviews. From $%d per night.",
+      //   hotel.rating,
+      //   hotel.numberOfReviews,
+      //   hotel.priceStarting
+      // )
+      .images([new builder.CardImage().url(hotel.image)])
+      .buttons([
+        new builder.CardAction()
+          .title("Book now")
+          .type("openUrl")
+          .value("https://www.bing.com/search?q=hotels+in+")
+      ])
+  );
 };
 
 const reviewAsAttachment = review => {
