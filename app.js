@@ -268,17 +268,16 @@ bot
 bot
   .dialog("BookingDetails", [
     (session, args, next) => {
-      // if (session.message.text === "No") {
-      //   session.send(
-      //     "We`ll miss you! Please consider us for your future bookings"
-      //   );
-      // }
-      // else {
-      session.message.text === "Yes";
-      session.send(
-        "Please enter your email below to continue with the reservation:"
-      );
-      // }
+      if (session.message.text === "No") {
+        session.send(
+          "We`ll miss you! Please consider us for your future bookings"
+        );
+      } else {
+        session.message.text === "Yes";
+        session.send(
+          "Please enter your email below to continue with the reservation:"
+        );
+      }
 
       next({ response: session.message.text });
     }
