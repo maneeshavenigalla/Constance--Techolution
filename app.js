@@ -145,7 +145,23 @@ bot
         session.send(`I found ${hotels.length} hotels:`);
         let message = new builder.Message()
           .attachmentLayout(builder.AttachmentLayout.carousel)
-          .attachments(hotels.map(hotelAsAttachment));
+          .attachments(
+            hotels.map(hotel => {
+              return new builder.HeroCard(session)
+                .title(hotel.hotelName)
+                .text(hotel.Location)
+                .subtitle(`${hotel.Rating}\n${hotel.description}`)
+                .images([builder.CardImage.create(session, hotel.image)])
+                .buttons([
+                  builder.CardAction.imBack(
+                    session,
+                    hotel.hotelName,
+                    "View Hotel"
+                  )
+                ]);
+            })
+          );
+
         session.send(message);
         // End
         session.endDialog();
@@ -156,65 +172,66 @@ bot
     matches: "SearchHotels"
   });
 
-// bot
-//   .dialog("SearchHotels", [
-//     (session, args, next) => {
-//       session.send("Thank you for choosing us!");
-// try extracting entities
-// const cityEntity = builder.EntityRecognizer.findEntity(
-//   args.intent.entities,
-//   "builtin.geography.city"
-// );
+//Hotel Query
 
-// console.log("city entity", cityEntity);
-// const airportEntity = builder.EntityRecognizer.findEntity(
-//   args.intent.entities,
-//   "AirportCode"
-// );
-// console.log("airport entity", airportEntity);
-// if (cityEntity) {
-//   // city entity detected, continue to next step
-//   session.dialogData.searchType = "city";
-//   next({ response: cityEntity.entity });
-// } else if (airportEntity) {
-//   // airport entity detected, continue to next step
-//   session.dialogData.searchType = "airport";
-//   next({ response: airportEntity.entity });
-// }
-//  else {
-// no entities detected, ask user for a destination
-// builder.Prompts.text(session, "Please select your preferred location!");
-//
-//   // }
-// },
-//   (session, results) => {
-// const destination = results.response;
-// let message = "Looking for hotels";
-// if (session.message.text === "airport") {
-//   message += " near %s airport...";
-// } else {
-//   message += " in %s...";
-// }
-// session.send(message, destination);
-// // Async search
-// Store.searchHotels(destination).then(hotels => {
-//   // args
-//   session.send(`I found ${hotels.length} hotels:`);
-//   let message = new builder.Message()
-//     .attachmentLayout(builder.AttachmentLayout.carousel)
-//     .attachments(hotels.map(hotelAsAttachment));
-//   session.send(message);
-//   // End
-//   session.endDialog();
-// });
-//   }
-// ])
-// .triggerAction({
-//   matches: "SearchHotels",
-//   onInterrupted: session => {
-//     session.send("Please provide a destination");
-//   }
-// });
+bot
+  .dialog("HotelQuery", [
+    (session, args, next) => {
+      const roomPrompt = `We are fetching available rooms for you in ${
+        session.message.text
+      }`;
+      session.send(roomPrompt, session.message.text);
+      // Async search
+      Store.searchRooms(session.message.text).then(rooms => {
+        session.send(`I found ${rooms[0].typeOfRooms.length} room/s:`);
+        let message = new builder.Message()
+          .attachmentLayout(builder.AttachmentLayout.carousel)
+          .attachments(
+            rooms[0].typeOfRooms.map(room => {
+              console.log("hey", room);
+              return new builder.HeroCard(session)
+                .title(room.roomType)
+                .subtitle(
+                  `\n${room.Price}\n Number of guests:${room.NoOfGuests}`
+                )
+                .images([builder.CardImage.create(session, room.roomImage)])
+                .buttons([
+                  builder.CardAction.imBack(session, room.roomType, "Book now")
+                ]);
+            })
+          );
+
+        session.send(message);
+      });
+    }
+  ])
+  .triggerAction({
+    matches: "HotelQuery"
+  });
+
+//ConfirmBooking
+
+bot
+  .dialog("ConfirmBooking", [
+    (session, args, next) => {
+      const ConfirmDialog = new builder.Message(session)
+        .text("Do you want me to confirm booking")
+        .suggestedActions(
+          builder.SuggestedActions.create(session, [
+            builder.CardAction.imBack(session, "Yes", "Yes"),
+            builder.CardAction.imBack(session, "No", "No")
+          ])
+        );
+
+      session.send(ConfirmDialog);
+      if (session.message.text === "Yes") {
+        session.send("Yola");
+      }
+    }
+  ])
+  .triggerAction({
+    matches: "ConfirmBooking"
+  });
 
 bot
   .dialog("ShowHotelsReviews", (session, args) => {
@@ -254,21 +271,6 @@ if (process.env.IS_SPELL_CORRECTION_ENABLED === "true") {
     }
   });
 }
-
-// Helpers
-const hotelAsAttachment = hotel => {
-  console.log(hotel.name, hotel.hotelName, "blha");
-  return new builder.HeroCard()
-    .title(hotel.hotelName)
-    .subtitle(`\n${hotel.Rating}\n${hotel.description}`)
-    .images([new builder.CardImage().url(hotel.image)])
-    .buttons([
-      new builder.CardAction()
-        .title("Book now")
-        .type("openUrl")
-        .value("https://www.bing.com/search?q=hotels+in+")
-    ]);
-};
 
 const reviewAsAttachment = review => {
   return new builder.ThumbnailCard()
