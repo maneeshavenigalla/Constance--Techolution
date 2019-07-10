@@ -454,7 +454,6 @@ const searchRooms = hotelNames => {
 
     const roomChoice = hotelDetails.filter(place => {
       if (place.hotelName == hotelNames) {
-        // console.log(Object.values(place.typeOfRooms));
         return Object.values(place.typeOfRooms);
       }
     });

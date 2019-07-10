@@ -228,6 +228,18 @@ bot
     matches: "HotelQuery"
   });
 
+//Ask number of rooms
+
+bot
+  .dialog("NumberOfDays", [
+    (session, args, next) => {
+      session.send("Can you enter the duration of your stay?");
+    }
+  ])
+  .triggerAction({
+    matches: "NumberOfDays"
+  });
+
 //Booking Date
 
 bot
@@ -286,10 +298,10 @@ bot
     matches: "BookingDetails"
   });
 
-//End Greetings
+//Confirm Mailer
 
 bot
-  .dialog("EndGreetings", [
+  .dialog("Mailer", [
     (session, args, next) => {
       let templateString1 = fs.readFileSync(
         path.join(__dirname, "mailer", "index.handlebars"),
@@ -298,8 +310,6 @@ bot
       let fn1 = handlebars.compile(templateString1);
 
       let templateData1 = userData;
-
-      console.log(userData);
 
       var emailDetails = {
         from: "booking@techolution.com",
@@ -323,6 +333,18 @@ bot
     },
     (session, args, next) => {
       session.send("Thank you!");
+    }
+  ])
+  .triggerAction({
+    matches: "Mailer"
+  });
+
+//End Greetings
+
+bot
+  .dialog("EndGreetings", [
+    (session, args, next) => {
+      session.send("Happy to help!!");
     }
   ])
   .triggerAction({
