@@ -24,6 +24,9 @@
   "dependencies": {
     "botbuilder": "^3.8.2",
     "dotenv-extended": "^1.0.4",
+    "handlebars": "^4.1.2",
+    "nodemailer": "^6.2.1",
+    "nodemailer-sendgrid-transport": "^0.2.0",
     "nodemon": "^1.19.1",
     "request": "^2.79.0",
     "restify": "^4.3.0"

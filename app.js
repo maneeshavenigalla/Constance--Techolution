@@ -5,6 +5,22 @@ const builder = require("botbuilder");
 const restify = require("restify");
 const Store = require("./store");
 const spellService = require("./spell-service");
+var nodemailer = require("nodemailer");
+var sgTransport = require("nodemailer-sendgrid-transport");
+const fs = require("fs");
+const handlebars = require("handlebars");
+const path = require("path");
+
+var options = {
+  auth: {
+    api_user: "ManeeshaVenigalla",
+    api_key: "Maneesha24"
+  }
+};
+
+const userData = {};
+
+var client = nodemailer.createTransport(sgTransport(options));
 
 // Setup Restify Server
 const server = restify.createServer();
@@ -72,7 +88,7 @@ bot.on("conversationUpdate", message => {
 bot
   .dialog("Greetings", session => {
     var msg = new builder.Message(session)
-      .text("How can I assist you today?")
+      .text("Hello there! How can I assist you today?")
       .suggestedActions(
         builder.SuggestedActions.create(session, [
           builder.CardAction.imBack(session, "Hotel Booking", "Hotel Booking"),
@@ -124,6 +140,7 @@ bot
             builder.CardAction.imBack(session, "Zanzibar", "Zanzibar")
           ])
         );
+
       session.send(location);
     }
   ])
@@ -161,6 +178,7 @@ bot
                 ]);
             })
           );
+        userData.location = session.message.text;
 
         session.send(message);
         // End
@@ -188,7 +206,6 @@ bot
           .attachmentLayout(builder.AttachmentLayout.carousel)
           .attachments(
             rooms[0].typeOfRooms.map(room => {
-              console.log("hey", room);
               return new builder.HeroCard(session)
                 .title(room.roomType)
                 .subtitle(
@@ -201,6 +218,8 @@ bot
             })
           );
 
+        userData.hotelName = session.message.text;
+
         session.send(message);
       });
     }
@@ -209,28 +228,106 @@ bot
     matches: "HotelQuery"
   });
 
+//Booking Date
+
+bot
+  .dialog("BookingDate", [
+    (session, args, next) => {
+      session.send("Please enter your date of arrival");
+      userData.roomType = session.message.text;
+    }
+  ])
+  .triggerAction({
+    matches: "BookingDate"
+  });
+
 //ConfirmBooking
 
 bot
   .dialog("ConfirmBooking", [
     (session, args, next) => {
       const ConfirmDialog = new builder.Message(session)
-        .text("Do you want me to confirm booking")
+        .text(`Do you want me to confirm booking on: ${session.message.text}?`)
         .suggestedActions(
           builder.SuggestedActions.create(session, [
             builder.CardAction.imBack(session, "Yes", "Yes"),
             builder.CardAction.imBack(session, "No", "No")
           ])
         );
+      userData.arrivalDate = session.message.text;
 
       session.send(ConfirmDialog);
-      if (session.message.text === "Yes") {
-        session.send("Yola");
-      }
     }
   ])
   .triggerAction({
     matches: "ConfirmBooking"
+  });
+
+//Booking Details
+
+bot
+  .dialog("BookingDetails", [
+    (session, args, next) => {
+      // if (session.message.text === "No") {
+      //   session.send(
+      //     "We`ll miss you! Please consider us for your future bookings"
+      //   );
+      // }
+      // else {
+      session.message.text === "Yes";
+      session.send(
+        "Please enter your email below to continue with the reservation:"
+      );
+      // }
+
+      next({ response: session.message.text });
+    }
+  ])
+  .triggerAction({
+    matches: "BookingDetails"
+  });
+
+//End Greetings
+
+bot
+  .dialog("EndGreetings", [
+    (session, args, next) => {
+      let templateString1 = fs.readFileSync(
+        path.join(__dirname, "mailer", "index.handlebars"),
+        "utf8"
+      );
+      let fn1 = handlebars.compile(templateString1);
+
+      let templateData1 = userData;
+
+      console.log(userData);
+
+      var emailDetails = {
+        from: "booking@techolution.com",
+        to: session.message.text,
+        subject: "Hotel Booking",
+        text: "Constance Hospitality",
+        html: fn1(templateData1)
+      };
+
+      (function sendMailer() {
+        client.sendMail(emailDetails, function(err, info) {
+          if (err) {
+            console.log(err);
+          } else {
+            session.send(
+              " We have mailed your booking details. Please check your mail for further assistance"
+            );
+          }
+        });
+      })();
+    },
+    (session, args, next) => {
+      session.send("Thank you!");
+    }
+  ])
+  .triggerAction({
+    matches: "EndGreetings"
   });
 
 bot
