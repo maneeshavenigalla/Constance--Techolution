@@ -10,11 +10,12 @@ var sgTransport = require("nodemailer-sendgrid-transport");
 const fs = require("fs");
 const handlebars = require("handlebars");
 const path = require("path");
+const config = require("./config");
 
 var options = {
   auth: {
-    api_user: "ManeeshaVenigalla",
-    api_key: "Maneesha24"
+    api_user: config.username,
+    api_key: config.password
   }
 };
 
@@ -92,8 +93,7 @@ bot
       .suggestedActions(
         builder.SuggestedActions.create(session, [
           builder.CardAction.imBack(session, "Hotel Booking", "Hotel Booking"),
-          builder.CardAction.imBack(session, "Services", "Services"),
-          builder.CardAction.imBack(session, "Leisure", "Leisure")
+          builder.CardAction.imBack(session, "Services", "Services")
         ])
       );
     session.send(msg);
@@ -285,13 +285,10 @@ bot
           "We`ll miss you! Please consider us for your future bookings"
         );
       } else {
-        session.message.text === "Yes";
         session.send(
           "Please enter your email below to continue with the reservation:"
         );
       }
-
-      next({ response: session.message.text });
     }
   ])
   .triggerAction({
@@ -319,32 +316,191 @@ bot
         html: fn1(templateData1)
       };
 
-      (function sendMailer() {
-        client.sendMail(emailDetails, function(err, info) {
+      async function sendMailer() {
+        await client.sendMail(emailDetails, function(err, info) {
           if (err) {
             console.log(err);
           } else {
-            session.send(
-              " We have mailed your booking details. Please check your mail for further assistance"
-            );
+            console.log(info.response);
           }
         });
-      })();
-    },
-    (session, args, next) => {
-      session.send("Thank you!");
+      }
+      sendMailer();
+
+      const transportation = new builder.Message(session)
+        .text(
+          "We have mailed your booking details. Please check your mail for further assistance.\nDo you want me to help you with the transportation?"
+        )
+        .suggestedActions(
+          builder.SuggestedActions.create(session, [
+            builder.CardAction.imBack(
+              session,
+              "Yes, that would be lovely",
+              "Yes, that would be lovely"
+            ),
+            builder.CardAction.imBack(session, "No, thank you", "No, thank you")
+          ])
+        );
+      session.send(transportation);
     }
   ])
   .triggerAction({
     matches: "Mailer"
   });
 
+//FlightDetails
+
+bot
+  .dialog("FlightDetails", [
+    (session, args, next) => {
+      if (session.message.text === "No, thank you") {
+        const servicesOpted = new builder.Message(session)
+          .text("Do you want to look at the services provided?")
+          .suggestedActions(
+            builder.SuggestedActions.create(session, [
+              builder.CardAction.imBack(session, "Services", "Services"),
+              builder.CardAction.imBack(
+                session,
+                "Not interested",
+                "Not interested"
+              )
+            ])
+          );
+        session.send(servicesOpted);
+      } else {
+        session.send(
+          "Kindly send your flight details to support@constance.com"
+        );
+        const servicesOpted = new builder.Message(session)
+          .text("Do you want to look at the services provided?")
+          .suggestedActions(
+            builder.SuggestedActions.create(session, [
+              builder.CardAction.imBack(session, "Services", "Services"),
+              builder.CardAction.imBack(
+                session,
+                "Not interested",
+                "Not interested"
+              )
+            ])
+          );
+        session.send(servicesOpted);
+      }
+    }
+  ])
+  .triggerAction({
+    matches: "FlightDetails"
+  });
+
+//AdditionalQueries
+
+bot
+  .dialog("AdditionalQueries", [
+    (session, args, next) => {
+      const typesOfServices = new builder.Message(session)
+        .text("Welcome to our services! What type of service do you need?")
+        .suggestedActions(
+          builder.SuggestedActions.create(session, [
+            builder.CardAction.imBack(session, "Restaurants", "Restaurants"),
+            builder.CardAction.imBack(session, "Golf", "Golf"),
+            builder.CardAction.imBack(session, "Wine", "Wine")
+          ])
+        );
+      session.send(typesOfServices);
+    }
+  ])
+  .triggerAction({
+    matches: "AdditionalQueries"
+  });
+
+//Restaurants
+bot
+  .dialog("Restaurants", [
+    (session, args, next) => {
+      // Async search
+      Store.searchRestaurants().then(restaurant => {
+        // args
+        session.send(`I found ${restaurant.length} restaurant/s:`);
+        let message = new builder.Message()
+          .attachmentLayout(builder.AttachmentLayout.carousel)
+          .attachments(
+            restaurant.map(rest => {
+              return new builder.HeroCard(session)
+                .title(`${rest.name}-${rest.timings}`)
+                .text(rest.cuisine)
+                .subtitle(`${rest.specials}\n${rest.rating}`)
+                .images([builder.CardImage.create(session, rest.image)])
+                .buttons([
+                  builder.CardAction.imBack(session, rest.name, "View Menu")
+                ]);
+            })
+          );
+
+        session.send(message);
+        // End
+        session.endDialog();
+      });
+    }
+  ])
+  .triggerAction({
+    matches: "Restaurants"
+  });
+
+//PromptMenu
+bot
+  .dialog("NameOfRestaurant", [
+    (session, args, next) => {
+      const preferredRestaurant = session.message.text;
+      session.send(preferredRestaurant);
+      // Async search
+      Store.promptMenu(preferredRestaurant).then(restaurant => {
+        // args
+        let menuCard = new builder.Message()
+          .attachmentLayout(builder.AttachmentLayout.carousel)
+          .attachments(
+            restaurant.map(menu => {
+              return new builder.HeroCard(session)
+                .title(menu.RestaurantName)
+                .images([builder.CardImage.create(session, menu.resMenu)])
+                .buttons([
+                  builder.CardAction.imBack(
+                    session,
+                    session.message.text,
+                    "Download Menu"
+                  ),
+                  builder.CardAction.imBack(
+                    session,
+                    session.message.text,
+                    "Book Table"
+                  )
+                ]);
+            })
+          );
+        session.send(menuCard);
+        // End
+        session.endDialog();
+      });
+    }
+  ])
+  .triggerAction({
+    matches: "NameOfRestaurant"
+  });
+
+//Golf
+bot.dialog("Golf", [(session, args, next) => {}]).triggerAction({
+  matches: "Golf"
+});
+
+//Wine
+bot.dialog("Wine", [(session, args, next) => {}]).triggerAction({
+  matches: "Wine"
+});
+
 //End Greetings
 
 bot
   .dialog("EndGreetings", [
     (session, args, next) => {
-      session.send("Happy to help!!");
+      session.send("I`m glad I could be of some help!!");
     }
   ])
   .triggerAction({
