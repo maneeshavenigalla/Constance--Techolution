@@ -427,76 +427,58 @@ const restaurants = [
     id: 0,
     cuisine: "Arabian",
     timings: "12am to 10pm",
+    rating: 4.7,
     specials: "Chicken kebab",
     RestaurantName: "Golf Arabia",
     resImage:
       "https://images.unsplash.com/photo-1511690656952-34342bb7c2f2?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60",
 
     resMenu: "https://images.typeform.com/images/8p4zQZ9fznTw/image/default"
+  },
+  {
+    id: 1,
+    cuisine: "Italian",
+    timings: "6am to 8pm",
+    specials: "Pizza",
+    RestaurantName: "Italy in Halaveli",
+    resImage:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRsqaFKcBzMVbkkcO6ZfUgx9S6rtSgriE0tisRufBrhrXBdnCyE",
+    resMenu:
+      "https://buonappetitoristorante.com/wp-content/uploads/2015/08/BA_lunch-menu-image.jpg"
+  },
+  {
+    id: 3,
+    cuisine: "Indian",
+    timings: "6am to 11pm",
+    specials: "Dum ki Biriyani",
+    RestaurantName: "Maharaja Palace",
+    resImage:
+      "https://images.unsplash.com/photo-1552590635-27c2c2128abf?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60",
+    resMenu: "http://www.coomaindian.com/wp-content/uploads/2015/12/menu1.jpg"
+  },
+  {
+    id: 4,
+    cuisine: "Chinese",
+    timings: "7am to 9:30pm",
+    specials: "Noodles",
+    RestaurantName: "Bow to the dragon",
+    resMenu:
+      "https://static1.squarespace.com/static/54ef23dae4b04ae51565fa03/t/5ac4a73488251b86bcbe42b9/1522837317771/Menu+3.0-page-001.jpg",
+    resImage:
+      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60"
+  },
+  {
+    id: 5,
+    cuisine: "Thai",
+    timings: "11am to 11pm",
+    specials: "Thai fried rice",
+    RestaurantName: "Phuket & kraby",
+    resImage:
+      "https://images.unsplash.com/photo-1453831362806-3d5577f014a4?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60",
 
-    //   image:
-    //     "https://i.pinimg.com/originals/87/78/6a/87786a3c5d013a6abe25a1b1c966aa2a.jpg"
-    // }
-    // ]
+    resMenu:
+      "https://www.phonsthai.com.au/wp-content/uploads/2015/04/phons_thai_takeaway_menu_may_2017_p1.jpg"
   }
-  // {
-  //   id: 1,
-  //   cuisine: "Italian",
-  //   timings: "6am to 8pm",
-  //   specials: "Pizza",
-  //   RestaurantName: "Italy in Halaveli",
-  //   resImage:
-  //     "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRsqaFKcBzMVbkkcO6ZfUgx9S6rtSgriE0tisRufBrhrXBdnCyE",
-  //   resMenu: [
-  //     "https://buonappetitoristorante.com/wp-content/uploads/2015/08/BA_lunch-menu-image.jpg",
-
-  //     "https://b.zmtcdn.com/data/menus/577/6800577/120354d0b0e49144c8d779c2fb31ae67.jpg"
-  //   ]
-  // },
-  // {
-  //   id: 3,
-  //   cuisine: "Indian",
-  //   timings: "6am to 11pm",
-  //   specials: "Dum ki Biriyani",
-  //   RestaurantName: "Maharaja Palace",
-  //   resImage:
-  //     "https://images.unsplash.com/photo-1552590635-27c2c2128abf?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60",
-  //   resMenu: [
-  //     "http://www.coomaindian.com/wp-content/uploads/2015/12/menu1.jpg",
-  //     "http://newindiapalace.net/images/menu-1.PNG"
-  //   ]
-  // }
-  // {
-  //   id: 4,
-  //   cuisine: "Chinese",
-  //   timings: "7am to 9:30pm",
-  //   specials: "Noodles",
-  //   RestaurantName: "Bow to the dragon",
-  //   resMenu: {
-  //     menuFront:
-  //       "https://static1.squarespace.com/static/54ef23dae4b04ae51565fa03/t/5ac4a73488251b86bcbe42b9/1522837317771/Menu+3.0-page-001.jpg",
-  //     menuBack:
-  //       "https://b.zmtcdn.com/data/menus/093/16866093/c37f4085dc3ac5f6f9a9341f72ee575f.jpg"
-  //   },
-  //   resImage:
-  //     "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60"
-  // },
-  // {
-  //   id: 5,
-  //   cuisine: "Thai",
-  //   timings: "11am to 11pm",
-  //   specials: "Thai fried rice",
-  //   RestaurantName: "Phuket & kraby",
-  //   resImage:
-  //     "https://images.unsplash.com/photo-1453831362806-3d5577f014a4?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60",
-
-  //   resMenu: {
-  //     menuFront:
-  //       "https://www.phonsthai.com.au/wp-content/uploads/2015/04/phons_thai_takeaway_menu_may_2017_p1.jpg",
-  //     menuBack:
-  //       "https://www.burger7.co.uk/uploads/files/1515163107439256_9742b4dad9aa4dd6aff1b32aae28e1b7_mv2_d_1789_1275_s_2.png"
-  //   }
-  // }
 ];
 
 const searchHotels = destination => {

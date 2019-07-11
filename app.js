@@ -229,7 +229,6 @@ bot
   });
 
 //Ask number of rooms
-
 bot
   .dialog("NumberOfDays", [
     (session, args, next) => {
@@ -245,6 +244,7 @@ bot
 bot
   .dialog("BookingDate", [
     (session, args, next) => {
+      console.log(args);
       session.send("Please enter your date of arrival");
       userData.roomType = session.message.text;
     }
@@ -450,7 +450,6 @@ bot
   .dialog("NameOfRestaurant", [
     (session, args, next) => {
       const preferredRestaurant = session.message.text;
-      session.send(preferredRestaurant);
       // Async search
       Store.promptMenu(preferredRestaurant).then(restaurant => {
         // args
@@ -462,28 +461,183 @@ bot
                 .title(menu.RestaurantName)
                 .images([builder.CardImage.create(session, menu.resMenu)])
                 .buttons([
-                  builder.CardAction.imBack(
-                    session,
-                    session.message.text,
-                    "Download Menu"
-                  ),
-                  builder.CardAction.imBack(
-                    session,
-                    session.message.text,
-                    "Book Table"
-                  )
+                  // builder.CardAction.imBack(
+                  //   session,
+                  //   "Send menu in mail",
+                  //   "Send menu in mail"
+                  // ),
+                  builder.CardAction.imBack(session, "Book Table", "Book Table")
                 ]);
             })
           );
         session.send(menuCard);
-        // End
-        session.endDialog();
       });
     }
   ])
   .triggerAction({
     matches: "NameOfRestaurant"
   });
+
+//No Of Individuals
+
+bot
+  .dialog("NoOfIndividuals", [
+    (session, args, next) => {
+      if (session.message && session.message.value) {
+        function processSubmitAction(session, value) {
+          var defaultErrorMessage = "Please enter a value";
+          if (!value.noGuests) {
+            session.send(defaultErrorMessage);
+            return false;
+          } else {
+            return true;
+          }
+        }
+        // A Card's Submit Action obj was received
+        if (processSubmitAction(session, session.message.value)) {
+          next(session.message.value);
+        }
+        return;
+      }
+      // Display Welcome card with Hotels and Flights search options
+      var card = {
+        contentType: "application/vnd.microsoft.card.adaptive",
+        content: {
+          $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+          type: "AdaptiveCard",
+          version: "1.0",
+          body: [
+            {
+              type: "ColumnSet",
+              columns: [
+                {
+                  type: "Column",
+                  width: 2,
+                  items: [
+                    {
+                      type: "TextBlock",
+                      text: "Please enter the number of guests?",
+                      weight: "bolder",
+                      size: "medium"
+                    },
+                    {
+                      type: "TextBlock",
+                      text: "Number of Guests"
+                    },
+                    {
+                      type: "Input.Number",
+                      id: "noGuests",
+                      placeholder: "Please enter a value"
+                    },
+                    {
+                      type: "Input.Time",
+                      id: "bookingTime",
+                      placeholder: "Please enter a value"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          actions: [
+            {
+              type: "Action.Submit",
+              title: "Submit"
+            }
+          ]
+        }
+      };
+
+      var msg = new builder.Message(session).addAttachment(card);
+      session.send(msg);
+    },
+    (session, results) => {
+      session.send(
+        "Thanks a lot for your valuable time. Your booking has been done!!"
+      );
+    }
+  ])
+  .triggerAction({
+    matches: "NoOfIndividuals"
+  });
+
+//Booking Slot
+
+bot
+  .dialog("BookingSlot", [
+    (session, results) => {
+      console.log("maneesha1", session.message.text);
+
+      console.log("numberof guests", results.response);
+      var arrivalSlot = new builder.Message(session).addAttachment({
+        contentType: "application/vnd.microsoft.card.adaptive",
+        content: {
+          type: "AdaptiveCard",
+          body: [
+            {
+              type: "TextBlock",
+              text: "Please enter your date of arrival?",
+              size: "large",
+              weight: "bolder"
+            },
+            {
+              type: "TextBlock",
+              text: "Arrival Slot"
+            },
+            {
+              type: "Input.ChoiceSet",
+              id: "Arrival Slot",
+              style: "compact",
+              choices: [
+                {
+                  title: "00",
+                  value: "00",
+                  isSelected: true
+                },
+                {
+                  title: "01",
+                  value: "01"
+                },
+                {
+                  title: "02",
+                  value: "02"
+                },
+                {
+                  title: "24",
+                  value: "24"
+                }
+              ],
+              choices: [
+                {
+                  title: "20",
+                  value: "20"
+                },
+                {
+                  title: "40",
+                  value: "40"
+                },
+                {
+                  title: "30",
+                  value: "30"
+                }
+              ],
+              choices: []
+            }
+          ]
+        }
+      });
+      session.send(arrivalSlot);
+    }
+  ])
+  .triggerAction({
+    matches: "BookingSlot"
+  });
+
+//Reservation Confirmation
+
+bot.dialog("ConfirmReservation", [(session, args, next) => {}]).triggerAction({
+  matches: "ConfirmReservation"
+});
 
 //Golf
 bot.dialog("Golf", [(session, args, next) => {}]).triggerAction({
