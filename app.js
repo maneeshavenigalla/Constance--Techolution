@@ -461,11 +461,6 @@ bot
                 .title(menu.RestaurantName)
                 .images([builder.CardImage.create(session, menu.resMenu)])
                 .buttons([
-                  // builder.CardAction.imBack(
-                  //   session,
-                  //   "Send menu in mail",
-                  //   "Send menu in mail"
-                  // ),
                   builder.CardAction.imBack(session, "Book Table", "Book Table")
                 ]);
             })
@@ -555,6 +550,19 @@ bot
       session.send(
         "Thanks a lot for your valuable time. Your booking has been done!!"
       );
+      var otherServices = new builder.Message(session)
+        .text("Do you want to have a look at our other services?")
+        .suggestedActions(
+          builder.SuggestedActions.create(session, [
+            builder.CardAction.imBack(session, "Services", "Services"),
+            builder.CardAction.imBack(
+              session,
+              "Not interested",
+              "Not interested"
+            )
+          ])
+        );
+      session.send(otherServices);
     }
   ])
   .triggerAction({
@@ -562,76 +570,6 @@ bot
   });
 
 //Booking Slot
-
-bot
-  .dialog("BookingSlot", [
-    (session, results) => {
-      console.log("maneesha1", session.message.text);
-
-      console.log("numberof guests", results.response);
-      var arrivalSlot = new builder.Message(session).addAttachment({
-        contentType: "application/vnd.microsoft.card.adaptive",
-        content: {
-          type: "AdaptiveCard",
-          body: [
-            {
-              type: "TextBlock",
-              text: "Please enter your date of arrival?",
-              size: "large",
-              weight: "bolder"
-            },
-            {
-              type: "TextBlock",
-              text: "Arrival Slot"
-            },
-            {
-              type: "Input.ChoiceSet",
-              id: "Arrival Slot",
-              style: "compact",
-              choices: [
-                {
-                  title: "00",
-                  value: "00",
-                  isSelected: true
-                },
-                {
-                  title: "01",
-                  value: "01"
-                },
-                {
-                  title: "02",
-                  value: "02"
-                },
-                {
-                  title: "24",
-                  value: "24"
-                }
-              ],
-              choices: [
-                {
-                  title: "20",
-                  value: "20"
-                },
-                {
-                  title: "40",
-                  value: "40"
-                },
-                {
-                  title: "30",
-                  value: "30"
-                }
-              ],
-              choices: []
-            }
-          ]
-        }
-      });
-      session.send(arrivalSlot);
-    }
-  ])
-  .triggerAction({
-    matches: "BookingSlot"
-  });
 
 //Reservation Confirmation
 
