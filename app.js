@@ -179,7 +179,7 @@ bot
                   builder.CardAction.imBack(
                     session,
                     hotel.hotelName,
-                    "View Hotel"
+                    "Choose Hotel"
                   )
                 ]);
             })
@@ -207,7 +207,7 @@ bot
       session.send(roomPrompt, session.message.text);
       // Async search
       Store.searchRooms(session.message.text).then(rooms => {
-        session.send(`I found ${rooms[0].typeOfRooms.length} room/s:`);
+        session.send("Pls choose one of the following room types:");
         let message = new builder.Message()
           .attachmentLayout(builder.AttachmentLayout.carousel)
           .attachments(
@@ -252,8 +252,7 @@ bot
 bot
   .dialog("BookingDate", [
     (session, args, next) => {
-      console.log(args);
-      session.send("Please enter your date of arrival");
+      session.send("Please enter your date of arrival in dd/mm/yyyy format?");
       userData.roomType = session.message.text;
     }
   ])
@@ -465,7 +464,6 @@ bot
           .attachmentLayout(builder.AttachmentLayout.carousel)
           .attachments(
             restaurant.map(menu => {
-              console.log(menu);
               return new builder.HeroCard(session)
                 .title(menu.RestaurantName)
                 .images([builder.CardImage.create(session, menu.resMenu)])
@@ -526,17 +524,26 @@ bot
                   items: [
                     {
                       type: "TextBlock",
-                      text: "Please enter the number of guests?",
+                      text: "Please fill the following details:",
                       weight: "bolder",
                       size: "medium"
                     },
                     {
                       type: "TextBlock",
-                      text: "Number of Guests"
+                      text: "Number of Individuals"
                     },
                     {
                       type: "Input.Number",
                       id: "noGuests",
+                      placeholder: "Please enter a value"
+                    },
+                    {
+                      type: "TextBlock",
+                      text: "Please enter your booking date"
+                    },
+                    {
+                      type: "Input.Date",
+                      id: "bookingDate",
                       placeholder: "Please enter a value"
                     },
                     {
@@ -626,7 +633,7 @@ bot
                 )
                 .subtitle(
                   `Driving Range - ${golf.drivingRange}\n Night Golf - ${
-                    golf.nightgolf
+                    golf.nightGolf
                   }\n Rental shoes - ${golf.rentalShoes} `
                 )
                 .images([builder.CardImage.create(session, golf.image)])
@@ -641,29 +648,6 @@ bot
         session.endDialog();
       });
       // )();
-      // golf.map(golfMenu => {
-      //   console.log(golfMenu);
-      //   return new builder.HeroCard(session)
-      //     .title(golfMenu.courseType)
-      //     .subtitle(
-      //       `Yard Range - ${golfMenu.yardRange}\n Walking Permitted - ${
-      //         golfMenu.walkingPermitted
-      //       }\n Driving range - ${golfMenu.drivingRange}\n holes - ${
-      //         golf.holes
-      //       }\n Night Golf - ${golfMenu.nightGolf}\n Rental shoes - ${
-      //         golfMenu.rentalShoes
-      //       }`
-      //     )
-      //     .images([builder.CardImage.create(session, golfMenu.image)])
-      //     .buttons([
-      //       builder.CardAction.imBack(
-      //         session,
-      //         "Book Golf Course",
-      //         "Book Golf Course"
-      //       )
-      //     ]);
-      // })
-      // session.send(golfCard);
     }
   ])
   .triggerAction({
@@ -808,27 +792,6 @@ bot
     matches: "EndGreetings"
   });
 
-bot
-  .dialog("ShowHotelsReviews", (session, args) => {
-    // retrieve hotel name from matched entities
-    const hotelEntity = builder.EntityRecognizer.findEntity(
-      args.intent.entities,
-      "Hotel"
-    );
-    if (hotelEntity) {
-      session.send(`Looking for reviews of '${hotelEntity.entity}'...`);
-      Store.searchHotelReviews(hotelEntity.entity).then(reviews => {
-        let message = new builder.Message()
-          .attachmentLayout(builder.AttachmentLayout.carousel)
-          .attachments(reviews.map(reviewAsAttachment));
-        session.endDialog(message);
-      });
-    }
-  })
-  .triggerAction({
-    matches: "ShowHotelsReviews"
-  });
-
 // Spell Check
 if (process.env.IS_SPELL_CORRECTION_ENABLED === "true") {
   bot.use({
@@ -846,10 +809,3 @@ if (process.env.IS_SPELL_CORRECTION_ENABLED === "true") {
     }
   });
 }
-
-const reviewAsAttachment = review => {
-  return new builder.ThumbnailCard()
-    .title(review.title)
-    .text(review.text)
-    .images([new builder.CardImage().url(review.image)]);
-};
