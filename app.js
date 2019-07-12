@@ -21,6 +21,52 @@ var options = {
 
 const userData = {};
 
+const golf = [
+  {
+    courseType: "Private Golf Resort",
+    yardRange: "7100 (Black) | 6696 (Blue) | 6306 (White) | 5973 (Red)",
+    image:
+      "https://www.brainerd.com/wp-content/uploads/2018/06/slide-golf1.jpg",
+    walkingPermitted: "Only players during play",
+    drivingRange: "Yes, 24 Bay",
+    holes: "Par 3, 9 Hole Executive Course",
+    nightGolf: "Yes",
+    rentalShoes: "Yes"
+  }
+];
+
+const wine = [
+  {
+    name: "Domaine Leroy Chambertin Grand Cru",
+    image: "http://top100wine.com.tw/wp-content/uploads/0101-2.jpg",
+    recommended: 5
+  },
+  {
+    name: "château d'yquem",
+    image:
+      "https://assets.catawiki.nl/assets/2018/3/23/c/b/2/cb2312d0-42bd-4ec7-ab33-588abea6d6b3.jpg",
+    recommended: 4.9
+  },
+  {
+    name: "Masseto",
+    image:
+      "https://d23ub517d0w8vo.cloudfront.net/uploads/winery/large_image/1191/1191-masseto.jpg",
+    recommended: 4.7
+  },
+  {
+    name: "Casanova di Neri",
+    image:
+      "https://d23ub517d0w8vo.cloudfront.net/uploads/winery/large_image/302/302-casanova-di-neri.jpg",
+    recommended: 4.9
+  },
+  {
+    name: "Quintarelli Giuseppe",
+    image:
+      "https://www.winebtb.com/images/sites/winebtb/labels/giuseppe-quintarelli-amarone-della-valpolicella-classico_1.jpg",
+    recommended: 4.5
+  }
+];
+
 var client = nodemailer.createTransport(sgTransport(options));
 
 // Setup Restify Server
@@ -578,21 +624,168 @@ bot.dialog("ConfirmReservation", [(session, args, next) => {}]).triggerAction({
 });
 
 //Golf
-bot.dialog("Golf", [(session, args, next) => {}]).triggerAction({
-  matches: "Golf"
-});
+bot
+  .dialog("Golf", [
+    (session, args, next) => {
+      const golfCard = new builder.Message()
+        .attachmentLayout(builder.AttachmentLayout.carousel)
+        .attachments(
+          golf.map(golfMenu => {
+            console.log(golfMenu);
+            return new builder.HeroCard(session)
+              .title(golfMenu.courseType)
+              .subtitle(
+                `Yard Range - ${golfMenu.yardRange}\n Walking Permitted - ${
+                  golfMenu.walkingPermitted
+                }\n Driving range - ${golfMenu.drivingRange}\n holes - ${
+                  golf.holes
+                }\n Night Golf - ${golfMenu.nightGolf}\n Rental shoes - ${
+                  golfMenu.rentalShoes
+                }`
+              )
+              .images([builder.CardImage.create(session, golfMenu.image)])
+              .buttons([
+                builder.CardAction.imBack(
+                  session,
+                  "Book Golf Course",
+                  "Book Golf Course"
+                )
+              ]);
+          })
+        );
+      session.send(golfCard);
+    }
+  ])
+  .triggerAction({
+    matches: "Golf"
+  });
 
 //Wine
-bot.dialog("Wine", [(session, args, next) => {}]).triggerAction({
-  matches: "Wine"
-});
+bot
+  .dialog("Wine", [
+    (session, args, next) => {
+      const wineMenu = new builder.Message()
+        .attachmentLayout(builder.AttachmentLayout.carousel)
+        .attachments(
+          wine.map(wineItem => {
+            return new builder.HeroCard(session)
+              .title(wineItem.name)
+              .subtitle(`Recommended : ${wineItem.recommended}`)
+              .images([builder.CardImage.create(session, wineItem.image)])
+              .buttons([
+                builder.CardAction.imBack(session, wineItem.name, "Buy now")
+              ]);
+          })
+        );
+      session.send(wineMenu);
+    }
+  ])
+  .triggerAction({
+    matches: "Wine"
+  });
+
+//Wine Booking
+
+bot
+  .dialog("WineBooking", [
+    (session, args, next) => {
+      if (session.message && session.message.value) {
+        function processSubmitAction(session, value) {
+          var defaultErrorMessage = "Please enter a value";
+          if (!value.noUnits) {
+            session.send(defaultErrorMessage);
+            return false;
+          } else {
+            return true;
+          }
+        }
+        // A Card's Submit Action obj was received
+        if (processSubmitAction(session, session.message.value)) {
+          next(session.message.value);
+        }
+        return;
+      }
+      // Display Welcome card with Hotels and Flights search options
+      var card = {
+        contentType: "application/vnd.microsoft.card.adaptive",
+        content: {
+          $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+          type: "AdaptiveCard",
+          version: "1.0",
+          body: [
+            {
+              type: "ColumnSet",
+              columns: [
+                {
+                  type: "Column",
+                  width: 2,
+                  items: [
+                    {
+                      type: "TextBlock",
+                      text: "Please enter the following details!",
+                      weight: "bolder",
+                      size: "medium"
+                    },
+                    {
+                      type: "Input.Number",
+                      id: "noUnits",
+                      placeholder: "Please enter number of units"
+                    },
+                    {
+                      type: "Input.Text",
+                      id: "bookingTime",
+                      placeholder: "Please enter your Room Number"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          actions: [
+            {
+              type: "Action.Submit",
+              title: "Submit"
+            }
+          ]
+        }
+      };
+
+      var msg = new builder.Message(session).addAttachment(card);
+      session.send(msg);
+    },
+    (session, results) => {
+      session.send(
+        "Your booking has been done. You`ll receive the order in the next 30 mins."
+      );
+      var otherServices = new builder.Message(session)
+        .text("Do you want to have a look at our other services?")
+        .suggestedActions(
+          builder.SuggestedActions.create(session, [
+            builder.CardAction.imBack(session, "Services", "Services"),
+            builder.CardAction.imBack(
+              session,
+              "Not interested",
+              "Not interested"
+            )
+          ])
+        );
+      session.send(otherServices);
+    }
+  ])
+  .triggerAction({
+    matches: "WineBooking"
+  });
 
 //End Greetings
 
 bot
   .dialog("EndGreetings", [
     (session, args, next) => {
-      session.send("I`m glad I could be of some help!!");
+      if (session.message.text === "Not interested") {
+        session.send("Have a nice day");
+      } else {
+        session.send("Thank you! I`m glad I could be of some help!!");
+      }
     }
   ])
   .triggerAction({

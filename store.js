@@ -481,6 +481,21 @@ const restaurants = [
   }
 ];
 
+const golf = [
+  {
+    courseType: "Private Golf Resort",
+    yardRange: "7100 (Black) | 6696 (Blue) | 6306 (White) | 5973 (Red)",
+    image:
+      "https://www.deltagolfcourse.com/wp-content/uploads/sites/6810/2018/01/3O9A2663_edited-2.jpg",
+    walkingPermitted: "Only players during play",
+    drivingRange: "Yes, 24 Bay",
+    holes: "Par 3, 9 Hole Executive Course",
+    nightGolf: "Yes",
+    rentalShoes: "Yes",
+    lockerRooms: "Yes, Mens and Ladies"
+  }
+];
+
 const searchHotels = destination => {
   return new Promise((resolve, reject) => {
     // Filling the hotels results manually just for demo purposes
@@ -564,6 +579,18 @@ const searchRooms = hotelNames => {
   });
 };
 
+//Golf
+
+const GolfService = () => {
+  return new Promise((resolve, reject) => {
+    // Filling the hotels results manually just for demo purposes
+
+    return golf;
+
+    // complete promise with a timer to simulate async response
+  });
+};
+
 const searchHotelReviews = hotelName => {
   return new Promise((resolve, reject) => {
     // Filling the review results manually just for demo purposes
@@ -591,5 +618,6 @@ module.exports = {
   searchHotelReviews,
   searchRooms,
   searchRestaurants,
-  promptMenu
+  promptMenu,
+  GolfService
 };
