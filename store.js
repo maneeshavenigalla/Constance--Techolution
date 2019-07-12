@@ -486,13 +486,44 @@ const golf = [
     courseType: "Private Golf Resort",
     yardRange: "7100 (Black) | 6696 (Blue) | 6306 (White) | 5973 (Red)",
     image:
-      "https://www.deltagolfcourse.com/wp-content/uploads/sites/6810/2018/01/3O9A2663_edited-2.jpg",
+      "https://www.brainerd.com/wp-content/uploads/2018/06/slide-golf1.jpg",
     walkingPermitted: "Only players during play",
     drivingRange: "Yes, 24 Bay",
     holes: "Par 3, 9 Hole Executive Course",
     nightGolf: "Yes",
-    rentalShoes: "Yes",
-    lockerRooms: "Yes, Mens and Ladies"
+    rentalShoes: "Yes"
+  }
+];
+
+const wine = [
+  {
+    name: "Domaine Leroy Chambertin Grand Cru",
+    image: "http://top100wine.com.tw/wp-content/uploads/0101-2.jpg",
+    recommended: 5
+  },
+  {
+    name: "château d'yquem",
+    image:
+      "https://assets.catawiki.nl/assets/2018/3/23/c/b/2/cb2312d0-42bd-4ec7-ab33-588abea6d6b3.jpg",
+    recommended: 4.9
+  },
+  {
+    name: "Masseto",
+    image:
+      "https://d23ub517d0w8vo.cloudfront.net/uploads/winery/large_image/1191/1191-masseto.jpg",
+    recommended: 4.7
+  },
+  {
+    name: "Casanova di Neri",
+    image:
+      "https://d23ub517d0w8vo.cloudfront.net/uploads/winery/large_image/302/302-casanova-di-neri.jpg",
+    recommended: 4.9
+  },
+  {
+    name: "Quintarelli Giuseppe",
+    image:
+      "https://www.winebtb.com/images/sites/winebtb/labels/giuseppe-quintarelli-amarone-della-valpolicella-classico_1.jpg",
+    recommended: 4.5
   }
 ];
 
@@ -585,8 +616,39 @@ const GolfService = () => {
   return new Promise((resolve, reject) => {
     // Filling the hotels results manually just for demo purposes
 
-    return golf;
+    const golfCourse = golf.map(golfItem => {
+      return {
+        courseType: golfItem.courseType,
+        yardRange: golfItem.yardRange,
+        image: golfItem.image,
+        walkingPermitted: golfItem.walkingPermitted,
+        drivingRange: golfItem.drivingRange,
+        holes: golfItem.holes,
+        nightGolf: golfItem.nightGolf,
+        rentalShoes: golfItem.rentalShoes
+      };
+    });
+    setTimeout(() => {
+      resolve(golfCourse);
+    }, 500);
+    // complete promise with a timer to simulate async response
+  });
+};
 
+const WineService = () => {
+  return new Promise((resolve, reject) => {
+    // Filling the hotels results manually just for demo purposes
+
+    const wineCourse = wine.map(wineItem => {
+      return {
+        name: wineItem.name,
+        image: wineItem.image,
+        recommended: wineItem.recommended
+      };
+    });
+    setTimeout(() => {
+      resolve(wineCourse);
+    }, 500);
     // complete promise with a timer to simulate async response
   });
 };
@@ -619,5 +681,6 @@ module.exports = {
   searchRooms,
   searchRestaurants,
   promptMenu,
-  GolfService
+  GolfService,
+  WineService
 };

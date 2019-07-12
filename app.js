@@ -21,52 +21,6 @@ var options = {
 
 const userData = {};
 
-const golf = [
-  {
-    courseType: "Private Golf Resort",
-    yardRange: "7100 (Black) | 6696 (Blue) | 6306 (White) | 5973 (Red)",
-    image:
-      "https://www.brainerd.com/wp-content/uploads/2018/06/slide-golf1.jpg",
-    walkingPermitted: "Only players during play",
-    drivingRange: "Yes, 24 Bay",
-    holes: "Par 3, 9 Hole Executive Course",
-    nightGolf: "Yes",
-    rentalShoes: "Yes"
-  }
-];
-
-const wine = [
-  {
-    name: "Domaine Leroy Chambertin Grand Cru",
-    image: "http://top100wine.com.tw/wp-content/uploads/0101-2.jpg",
-    recommended: 5
-  },
-  {
-    name: "château d'yquem",
-    image:
-      "https://assets.catawiki.nl/assets/2018/3/23/c/b/2/cb2312d0-42bd-4ec7-ab33-588abea6d6b3.jpg",
-    recommended: 4.9
-  },
-  {
-    name: "Masseto",
-    image:
-      "https://d23ub517d0w8vo.cloudfront.net/uploads/winery/large_image/1191/1191-masseto.jpg",
-    recommended: 4.7
-  },
-  {
-    name: "Casanova di Neri",
-    image:
-      "https://d23ub517d0w8vo.cloudfront.net/uploads/winery/large_image/302/302-casanova-di-neri.jpg",
-    recommended: 4.9
-  },
-  {
-    name: "Quintarelli Giuseppe",
-    image:
-      "https://www.winebtb.com/images/sites/winebtb/labels/giuseppe-quintarelli-amarone-della-valpolicella-classico_1.jpg",
-    recommended: 4.5
-  }
-];
-
 var client = nodemailer.createTransport(sgTransport(options));
 
 // Setup Restify Server
@@ -112,13 +66,13 @@ bot.on("conversationUpdate", message => {
               body: [
                 {
                   type: "Image",
-                  size: "large",
+                  size: "small",
                   url:
                     "https://www.constancehospitality.com/images/logo_254.png"
                 },
                 {
                   type: "TextBlock",
-                  text: "Welcome to Constance Bot! Your friendly Bot!"
+                  text: `Welcome to Constance Bot! Your friendly Bot! Type "hi" to start a conversation`
                 }
               ]
             }
@@ -153,7 +107,7 @@ bot
 bot
   .dialog("Purpose", (session, args, next) => {
     var purpose = new builder.Message(session)
-      .text("What is the purpose of your visit?")
+      .text(" Please select the purpose of your visit :")
       .suggestedActions(
         builder.SuggestedActions.create(session, [
           builder.CardAction.imBack(session, "Business", "Business"),
@@ -176,7 +130,9 @@ bot
     },
     (session, args, next) => {
       const location = new builder.Message(session)
-        .text("What is your preferred location?")
+        .text(
+          "What is your preferred location? Please select from the choices below:"
+        )
         .suggestedActions(
           builder.SuggestedActions.create(session, [
             builder.CardAction.imBack(session, "Mauritius", "Mauritius"),
@@ -205,7 +161,7 @@ bot
       // Async search
       Store.searchHotels(preferredLocation).then(hotels => {
         // args
-        session.send(`I found ${hotels.length} hotels:`);
+        session.send(`I found ${hotels.length} hotel(s):`);
         let message = new builder.Message()
           .attachmentLayout(builder.AttachmentLayout.carousel)
           .attachments(
@@ -213,7 +169,11 @@ bot
               return new builder.HeroCard(session)
                 .title(hotel.hotelName)
                 .text(hotel.Location)
-                .subtitle(`${hotel.Rating}\n${hotel.description}`)
+                .subtitle(
+                  `Hotel Rating - ${hotel.Rating}\n Description - ${
+                    hotel.description
+                  }`
+                )
                 .images([builder.CardImage.create(session, hotel.image)])
                 .buttons([
                   builder.CardAction.imBack(
@@ -255,7 +215,9 @@ bot
               return new builder.HeroCard(session)
                 .title(room.roomType)
                 .subtitle(
-                  `\n${room.Price}\n Number of guests:${room.NoOfGuests}`
+                  `\nPrice - ${room.Price}\n Number of guests:${
+                    room.NoOfGuests
+                  }`
                 )
                 .images([builder.CardImage.create(session, room.roomImage)])
                 .buttons([
@@ -503,10 +465,17 @@ bot
           .attachmentLayout(builder.AttachmentLayout.carousel)
           .attachments(
             restaurant.map(menu => {
+              console.log(menu);
               return new builder.HeroCard(session)
                 .title(menu.RestaurantName)
                 .images([builder.CardImage.create(session, menu.resMenu)])
                 .buttons([
+                  builder.CardAction.imBack(
+                    session,
+                    "Send menu in mail",
+                    "Send menu in mail"
+                  ),
+
                   builder.CardAction.imBack(session, "Book Table", "Book Table")
                 ]);
             })
@@ -571,6 +540,10 @@ bot
                       placeholder: "Please enter a value"
                     },
                     {
+                      type: "TextBlock",
+                      text: "Please enter your booking time"
+                    },
+                    {
                       type: "Input.Time",
                       id: "bookingTime",
                       placeholder: "Please enter a value"
@@ -600,7 +573,9 @@ bot
         .text("Do you want to have a look at our other services?")
         .suggestedActions(
           builder.SuggestedActions.create(session, [
-            builder.CardAction.imBack(session, "Services", "Services"),
+            builder.CardAction.imBack(session, "Restaurant", "Restaurant"),
+            builder.CardAction.imBack(session, "Golf", "Golf"),
+            builder.CardAction.imBack(session, "Wine", "Wine"),
             builder.CardAction.imBack(
               session,
               "Not interested",
@@ -619,41 +594,76 @@ bot
 
 //Reservation Confirmation
 
-bot.dialog("ConfirmReservation", [(session, args, next) => {}]).triggerAction({
-  matches: "ConfirmReservation"
-});
+bot
+  .dialog("ConfirmReservation", [
+    (session, args, next) => {
+      session.send("A confirmation mail has been sent to your email ID");
+    }
+  ])
+  .triggerAction({
+    matches: "ConfirmReservation"
+  });
 
 //Golf
 bot
   .dialog("Golf", [
     (session, args, next) => {
-      const golfCard = new builder.Message()
-        .attachmentLayout(builder.AttachmentLayout.carousel)
-        .attachments(
-          golf.map(golfMenu => {
-            console.log(golfMenu);
-            return new builder.HeroCard(session)
-              .title(golfMenu.courseType)
-              .subtitle(
-                `Yard Range - ${golfMenu.yardRange}\n Walking Permitted - ${
-                  golfMenu.walkingPermitted
-                }\n Driving range - ${golfMenu.drivingRange}\n holes - ${
-                  golf.holes
-                }\n Night Golf - ${golfMenu.nightGolf}\n Rental shoes - ${
-                  golfMenu.rentalShoes
-                }`
-              )
-              .images([builder.CardImage.create(session, golfMenu.image)])
-              .buttons([
-                builder.CardAction.imBack(
-                  session,
-                  "Book Golf Course",
-                  "Book Golf Course"
+      // const golfCard = new builder.Message()
+      //   .attachmentLayout(builder.AttachmentLayout.carousel)
+      //   .attachments(
+      Store.GolfService().then(golfItem => {
+        // args
+        let message = new builder.Message()
+          .attachmentLayout(builder.AttachmentLayout.carousel)
+          .attachments(
+            golfItem.map(golf => {
+              return new builder.HeroCard(session)
+                .title(`${golf.courseType}`)
+                .text(
+                  `Yard range - ${golf.yardRange}\n Number of holes - ${
+                    golf.holes
+                  }`
                 )
-              ]);
-          })
-        );
-      session.send(golfCard);
+                .subtitle(
+                  `Driving Range - ${golf.drivingRange}\n Night Golf - ${
+                    golf.nightgolf
+                  }\n Rental shoes - ${golf.rentalShoes} `
+                )
+                .images([builder.CardImage.create(session, golf.image)])
+                .buttons([
+                  builder.CardAction.imBack(session, "Book now", "Book now")
+                ]);
+            })
+          );
+
+        session.send(message);
+        // End
+        session.endDialog();
+      });
+      // )();
+      // golf.map(golfMenu => {
+      //   console.log(golfMenu);
+      //   return new builder.HeroCard(session)
+      //     .title(golfMenu.courseType)
+      //     .subtitle(
+      //       `Yard Range - ${golfMenu.yardRange}\n Walking Permitted - ${
+      //         golfMenu.walkingPermitted
+      //       }\n Driving range - ${golfMenu.drivingRange}\n holes - ${
+      //         golf.holes
+      //       }\n Night Golf - ${golfMenu.nightGolf}\n Rental shoes - ${
+      //         golfMenu.rentalShoes
+      //       }`
+      //     )
+      //     .images([builder.CardImage.create(session, golfMenu.image)])
+      //     .buttons([
+      //       builder.CardAction.imBack(
+      //         session,
+      //         "Book Golf Course",
+      //         "Book Golf Course"
+      //       )
+      //     ]);
+      // })
+      // session.send(golfCard);
     }
   ])
   .triggerAction({
@@ -664,20 +674,26 @@ bot
 bot
   .dialog("Wine", [
     (session, args, next) => {
-      const wineMenu = new builder.Message()
-        .attachmentLayout(builder.AttachmentLayout.carousel)
-        .attachments(
-          wine.map(wineItem => {
-            return new builder.HeroCard(session)
-              .title(wineItem.name)
-              .subtitle(`Recommended : ${wineItem.recommended}`)
-              .images([builder.CardImage.create(session, wineItem.image)])
-              .buttons([
-                builder.CardAction.imBack(session, wineItem.name, "Buy now")
-              ]);
-          })
-        );
-      session.send(wineMenu);
+      Store.WineService().then(wineItem => {
+        // args
+        let message = new builder.Message()
+          .attachmentLayout(builder.AttachmentLayout.carousel)
+          .attachments(
+            wineItem.map(wine => {
+              return new builder.HeroCard(session)
+                .title(`${wine.name}`)
+                .text(`Recommended - ${wine.recommended}`)
+                .images([builder.CardImage.create(session, wine.image)])
+                .buttons([
+                  builder.CardAction.imBack(session, wine.name, "Book now")
+                ]);
+            })
+          );
+
+        session.send(message);
+        // End
+        session.endDialog();
+      });
     }
   ])
   .triggerAction({
