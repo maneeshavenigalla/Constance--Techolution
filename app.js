@@ -72,7 +72,7 @@ bot.on("conversationUpdate", message => {
                 },
                 {
                   type: "TextBlock",
-                  text: `Welcome to Constance Bot! Your friendly Bot! Type "hi" to start a conversation`
+                  text: `Welcome to Constance Bot! Your friendly Bot!\n Type "hi" to start a conversation`
                 }
               ]
             }
