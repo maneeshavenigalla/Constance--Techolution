@@ -66,9 +66,9 @@ bot.on("conversationUpdate", message => {
               body: [
                 {
                   type: "Image",
-                  size: "small",
+                  size: "medium",
                   url:
-                    "https://www.constancehospitality.com/images/logo_254.png"
+                    "http://127.0.0.1:5500/constance-history/images/logo_254.png"
                 },
                 {
                   type: "TextBlock",
@@ -217,7 +217,7 @@ bot
                 .subtitle(
                   `\nPrice - ${room.Price}\n Number of guests:${
                     room.NoOfGuests
-                  }`
+                  }\n Smoking - ${room.Smoking}`
                 )
                 .images([builder.CardImage.create(session, room.roomImage)])
                 .buttons([
