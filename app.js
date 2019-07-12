@@ -68,7 +68,7 @@ bot.on("conversationUpdate", message => {
                   type: "Image",
                   size: "medium",
                   url:
-                    "http://127.0.0.1:5500/constance-history/images/logo_254.png"
+                    "https://www.constancehospitality.com/images/logo_254.png"
                 },
                 {
                   type: "TextBlock",
