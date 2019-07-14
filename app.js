@@ -499,7 +499,7 @@ bot
 
 bot
   .dialog("MenuMail", [
-    (session, args, next) => {
+    async (session, args, next) => {
       session.send("Your menu is downloaded");
       // var urlimage = "http://www.google.com/images/srpr/logo11w.png";
 
@@ -553,20 +553,55 @@ bot
       //   }
       // );
 
-      var url2 =
-        "http://l4.yimg.com/nn/fp/rsz/112113/images/smush/aaroncarter_635x250_1385060042.jpg";
+      // var url2 =
+      //   "http://l4.yimg.com/nn/fp/rsz/112113/images/smush/aaroncarter_635x250_1385060042.jpg";
 
-      var r = request(url2);
+      // var r = request(url2);
 
-      r.on("response", function(res) {
-        res.pipe(
-          fs.createWriteStream(
-            "./" +
-              res.headers.date +
-              "." +
-              res.headers["content-type"].split("/")[1]
-          )
-        );
+      // r.on("response", function(res) {
+      //   res.pipe(
+      //     fs.createWriteStream(
+      //       "./" +
+      //         res.headers.date +
+      //         "." +
+      //         res.headers["content-type"].split("/")[1]
+      //     )
+      //   );
+      // });
+
+      let file = fs.createWriteStream(`file.jpg`);
+      /* Using Promises so that we can use the ASYNC AWAIT syntax */
+
+      await new Promise((resolve, reject) => {
+        let stream = request({
+          /* Here you should specify the exact link to the file you are trying to download */
+          uri:
+            "http://l4.yimg.com/nn/fp/rsz/112113/images/smush/aaroncarter_635x250_1385060042.jpg",
+          headers: {
+            Accept:
+              "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+            "Accept-Encoding": "gzip, deflate, br",
+            "Accept-Language":
+              "en-US,en;q=0.9,fr;q=0.8,ro;q=0.7,ru;q=0.6,la;q=0.5,pt;q=0.4,de;q=0.3",
+            "Cache-Control": "max-age=0",
+            Connection: "keep-alive",
+            "Upgrade-Insecure-Requests": "1",
+            "User-Agent":
+              "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36"
+          },
+          /* GZIP true for most of the websites now, disable it if you don't need it */
+          gzip: true
+        })
+          .pipe(file)
+          .on("finish", () => {
+            console.log(`The file is finished downloading.`);
+            resolve();
+          })
+          .on("error", error => {
+            reject(error);
+          });
+      }).catch(error => {
+        console.log(`Something happened: ${error}`);
       });
 
       // var download = function(uri, filename, callback) {
