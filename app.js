@@ -11,12 +11,14 @@ var sgTransport = require("nodemailer-sendgrid-transport");
 const handlebars = require("handlebars");
 const path = require("path");
 const config = require("./config");
-// const request = require("request");
+const request = require("request");
 // const axios = require("axios");
 // var http = require("http"),
 //   Stream = require("stream").Transform,
 //   fs = require("fs");
 // const download = require("image-downloader");
+const http = require("http");
+const fs = require("fs");
 
 var options = {
   auth: {
@@ -533,33 +535,67 @@ bot
       //     console.log("done");
       //   }
       // );
+      // const file = fs.createWriteStream("file.jpg");
+      // const request = http.get(
+      //   "http://i3.ytimg.com/vi/J---aiyznGQ/mqdefault.jpg",
+      //   function(response) {
+      //     response.pipe(file);
+      //   }
+      // );
 
-      function getImages(uri) {
-        var request = require("request");
-        var url = require("url");
-        var cheerio = require("cheerio");
-        var path = require("path");
-        var fs = require("fs");
+      // request.download(
+      //   "https://www.google.com/images/srpr/logo3w.png",
+      //   function(err, res, body) {
+      //     if (err) {
+      //       console.log(err);
+      //     }
+      //     console.log(res);
+      //   }
+      // );
 
-        request(uri, function(error, response, body) {
-          if (!error && response.statusCode == 200) {
-            $ = cheerio.load(body);
-            imgs = $("img").toArray();
-            console.log("Downloading...");
-            imgs.forEach(function(img) {
-              //console.log(img.attribs.src)
-              process.stdout.write(".");
-              img_url = img.attribs.src;
-              if (/^https?:\/\//.test(img_url)) {
-                img_name = path.basename(img_url);
-                request(img_url).pipe(fs.createWriteStream(img_name));
-              }
-            });
-            console.log("Done!");
-          }
-        });
-      }
-      getImages("http://imgur.com/gallery");
+      var url2 =
+        "http://l4.yimg.com/nn/fp/rsz/112113/images/smush/aaroncarter_635x250_1385060042.jpg";
+
+      var r = request(url2);
+
+      r.on("response", function(res) {
+        res.pipe(
+          fs.createWriteStream(
+            "./" +
+              res.headers.date +
+              "." +
+              res.headers["content-type"].split("/")[1]
+          )
+        );
+      });
+      // function getImages(uri) {
+      //   var request = require("request");
+      //   var url = require("url");
+      //   var cheerio = require("cheerio");
+      //   var path = require("path");
+      //   var fs = require("fs");
+
+      //   request(uri, function(error, response, body) {
+      //     if (!error && response.statusCode == 200) {
+      //       $ = cheerio.load(body);
+      //       imgs = $("img").toArray();
+      //       console.log("Downloading...");
+      //       imgs.forEach(function(img) {
+      //         //console.log(img.attribs.src)
+      //         process.stdout.write(".");
+      //         img_url = img.attribs.src;
+      //         if (/^https?:\/\//.test(img_url)) {
+      //           img_name = path.basename(img_url);
+      //           request(img_url).pipe(fs.createWriteStream(img_name));
+      //         }
+      //       });
+      //       console.log("Done!");
+      //     }
+      //   });
+      // }
+      // getImages(
+      //   "https://cstcor-cdn-endpoint.azureedge.net/assets//images/logos/constance_logo_rvb.png?v=0.1.2-beta"
+      // );
 
       // var download = function(uri, filename, callback) {
       //   request.head(uri, function(err, res, body) {
