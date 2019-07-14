@@ -19,6 +19,7 @@ const request = require("request");
 // const download = require("image-downloader");
 const http = require("http");
 const fs = require("fs");
+const cp = require("child_process");
 
 var options = {
   auth: {
@@ -486,7 +487,6 @@ bot
                 ]);
             })
           );
-        // userData.image = menu.resMenu;
         session.send(menuCard);
       });
     }
@@ -501,124 +501,27 @@ bot
   .dialog("MenuMail", [
     async (session, args, next) => {
       session.send("Your menu is downloaded");
-      // var urlimage = "http://www.google.com/images/srpr/logo11w.png";
 
-      // const options = {
-      //   url: urlimage,
-      //   dest: "./images" // Save to /path/to/dest/image.jpg
-      // };
+      // console.log(userData.image);
+      let download = async function(uri, filename) {
+        let command = `curl -o ${filename}  '${uri}'`;
+        let result = cp.execSync(command);
+      };
 
-      // download
-      //   .image(options)
-      //   .then(({ filename, image }) => {
-      //     console.log("File saved to", filename);
-      //   })
-      //   .catch(err => {
-      //     console.error(err);
-      //   });
+      async function test() {
+        await download(
+          "http://zhangwenning.top/20181221001417.png",
+          "./20181221001417.png"
+        );
+      }
 
-      // var download = function(uri, filename, callback) {
-      //   request.head(uri, function(err, res, body) {
-      //     console.log("content-type:", res.headers["content-type"]);
-      //     console.log("content-length:", res.headers["content-length"]);
+      test();
+      const urk =
+        "https://ugcorigin.s-microsoft.com/100/d83cbe4e-75f7-4bca-b785-fbc381375700/200/v5/image.jpg";
 
-      //     request(uri)
-      //       .pipe(fs.createWriteStream(filename))
-      //       .on("close", callback);
-      //   });
-      // };
+      download(urk, "./imagess");
 
-      // download(
-      //   "https://www.google.com/images/srpr/logo3w.png",
-      //   "google.png",
-      //   function() {
-      //     console.log("done");
-      //   }
-      // );
-      // const file = fs.createWriteStream("file.jpg");
-      // const request = http.get(
-      //   "http://i3.ytimg.com/vi/J---aiyznGQ/mqdefault.jpg",
-      //   function(response) {
-      //     response.pipe(file);
-      //   }
-      // );
-
-      // request.download(
-      //   "https://www.google.com/images/srpr/logo3w.png",
-      //   function(err, res, body) {
-      //     if (err) {
-      //       console.log(err);
-      //     }
-      //     console.log(res);
-      //   }
-      // );
-
-      // var url2 =
-      //   "http://l4.yimg.com/nn/fp/rsz/112113/images/smush/aaroncarter_635x250_1385060042.jpg";
-
-      // var r = request(url2);
-
-      // r.on("response", function(res) {
-      //   res.pipe(
-      //     fs.createWriteStream(
-      //       "./" +
-      //         res.headers.date +
-      //         "." +
-      //         res.headers["content-type"].split("/")[1]
-      //     )
-      //   );
-      // });
-
-      let file = fs.createWriteStream(`file.jpg`);
-      /* Using Promises so that we can use the ASYNC AWAIT syntax */
-
-      await new Promise((resolve, reject) => {
-        let stream = request({
-          /* Here you should specify the exact link to the file you are trying to download */
-          uri:
-            "http://l4.yimg.com/nn/fp/rsz/112113/images/smush/aaroncarter_635x250_1385060042.jpg",
-          headers: {
-            Accept:
-              "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
-            "Accept-Encoding": "gzip, deflate, br",
-            "Accept-Language":
-              "en-US,en;q=0.9,fr;q=0.8,ro;q=0.7,ru;q=0.6,la;q=0.5,pt;q=0.4,de;q=0.3",
-            "Cache-Control": "max-age=0",
-            Connection: "keep-alive",
-            "Upgrade-Insecure-Requests": "1",
-            "User-Agent":
-              "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36"
-          },
-          /* GZIP true for most of the websites now, disable it if you don't need it */
-          gzip: true
-        })
-          .pipe(file)
-          .on("finish", () => {
-            console.log(`The file is finished downloading.`);
-            resolve();
-          })
-          .on("error", error => {
-            reject(error);
-          });
-      }).catch(error => {
-        console.log(`Something happened: ${error}`);
-      });
-
-      // var download = function(uri, filename, callback) {
-      //   request.head(uri, function(err, res, body) {
-      //     request(uri)
-      //       .pipe(fs.createWriteStream(filename))
-      //       .on("close", callback);
-      //   });
-      // };
-
-      // download(
-      //   "https://www.google.com/images/srpr/logo3w.png",
-      //   "./images/google.png",
-      //   function() {
-      //     console.log("done");
-      //   }
-      // );
+      session.send(`${urk}`);
       session.send("Bye");
     }
   ])
