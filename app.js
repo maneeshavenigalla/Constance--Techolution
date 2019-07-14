@@ -479,8 +479,8 @@ bot
                 .buttons([
                   builder.CardAction.imBack(
                     session,
-                    "Send menu in mail",
-                    "Send menu in mail"
+                    "Download menu",
+                    "Download menu"
                   ),
 
                   builder.CardAction.imBack(session, "Book Table", "Book Table")
@@ -488,6 +488,7 @@ bot
             })
           );
         session.send(menuCard);
+        userData.image = menuCard.resMenu;
       });
     }
   ])
@@ -500,29 +501,12 @@ bot
 bot
   .dialog("MenuMail", [
     async (session, args, next) => {
-      session.send("Your menu is downloaded");
+      session.send("Click on the link below to access the menu");
 
-      // console.log(userData.image);
-      let download = async function(uri, filename) {
-        let command = `curl -o ${filename}  '${uri}'`;
-        let result = cp.execSync(command);
-      };
-
-      async function test() {
-        await download(
-          "http://zhangwenning.top/20181221001417.png",
-          "./20181221001417.png"
-        );
-      }
-
-      test();
       const urk =
         "https://ugcorigin.s-microsoft.com/100/d83cbe4e-75f7-4bca-b785-fbc381375700/200/v5/image.jpg";
 
-      download(urk, "./imagess");
-
       session.send(`${urk}`);
-      session.send("Bye");
     }
   ])
   .triggerAction({
@@ -658,9 +642,6 @@ bot
 bot
   .dialog("Golf", [
     (session, args, next) => {
-      // const golfCard = new builder.Message()
-      //   .attachmentLayout(builder.AttachmentLayout.carousel)
-      //   .attachments(
       Store.GolfService().then(golfItem => {
         // args
         let message = new builder.Message()
@@ -770,9 +751,17 @@ bot
                       size: "medium"
                     },
                     {
+                      type: "TextBlock",
+                      text: "Please enter number of units:"
+                    },
+                    {
                       type: "Input.Number",
                       id: "noUnits",
                       placeholder: "Please enter number of units"
+                    },
+                    {
+                      type: "TextBlock",
+                      text: "Please enter your room number:"
                     },
                     {
                       type: "Input.Text",
