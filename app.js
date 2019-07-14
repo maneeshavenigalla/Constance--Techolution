@@ -7,10 +7,16 @@ const Store = require("./store");
 const spellService = require("./spell-service");
 var nodemailer = require("nodemailer");
 var sgTransport = require("nodemailer-sendgrid-transport");
-const fs = require("fs");
+// const fs = require("fs");
 const handlebars = require("handlebars");
 const path = require("path");
 const config = require("./config");
+const request = require("request");
+const axios = require("axios");
+var http = require("http"),
+  Stream = require("stream").Transform,
+  fs = require("fs");
+const download = require("image-downloader");
 
 var options = {
   auth: {
@@ -68,7 +74,7 @@ bot.on("conversationUpdate", message => {
                   type: "Image",
                   size: "medium",
                   url:
-                    "https://www.constancehospitality.com/images/logo_254.png"
+                    "https://cstcor-cdn-endpoint.azureedge.net/assets//images/logos/constance_logo_rvb.png?v=0.1.2-beta"
                 },
                 {
                   type: "TextBlock",
@@ -478,12 +484,76 @@ bot
                 ]);
             })
           );
+        // userData.image = menu.resMenu;
         session.send(menuCard);
       });
     }
   ])
   .triggerAction({
     matches: "NameOfRestaurant"
+  });
+
+//Download menu
+
+bot
+  .dialog("MenuMail", [
+    (session, args, next) => {
+      session.send("Your menu is downloaded");
+      // var urlimage = "http://www.google.com/images/srpr/logo11w.png";
+
+      // const options = {
+      //   url: urlimage,
+      //   dest: "./images" // Save to /path/to/dest/image.jpg
+      // };
+
+      // download
+      //   .image(options)
+      //   .then(({ filename, image }) => {
+      //     console.log("File saved to", filename);
+      //   })
+      //   .catch(err => {
+      //     console.error(err);
+      //   });
+
+      var download = function(uri, filename, callback) {
+        request.head(uri, function(err, res, body) {
+          console.log("content-type:", res.headers["content-type"]);
+          console.log("content-length:", res.headers["content-length"]);
+
+          request(uri)
+            .pipe(fs.createWriteStream(filename))
+            .on("close", callback);
+        });
+      };
+
+      download(
+        "https://www.google.com/images/srpr/logo3w.png",
+        "google.png",
+        function() {
+          console.log("done");
+        }
+      );
+
+      // var download = function(uri, filename, callback) {
+      //   request.head(uri, function(err, res, body) {
+      //     request(uri)
+      //       .pipe(fs.createWriteStream(filename))
+      //       .on("close", callback);
+      //   });
+      // };
+
+      // download(
+      //   "https://www.google.com/images/srpr/logo3w.png",
+      //   "./images/google.png",
+      //   function() {
+      //     console.log("done");
+      //   }
+      // );
+      session.send("Bye");
+    }
+  ])
+  .triggerAction({
+    matches: "MenuMail"
   });
 
 //No Of Individuals
