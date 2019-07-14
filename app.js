@@ -11,12 +11,12 @@ var sgTransport = require("nodemailer-sendgrid-transport");
 const handlebars = require("handlebars");
 const path = require("path");
 const config = require("./config");
-const request = require("request");
-const axios = require("axios");
-var http = require("http"),
-  Stream = require("stream").Transform,
-  fs = require("fs");
-const download = require("image-downloader");
+// const request = require("request");
+// const axios = require("axios");
+// var http = require("http"),
+//   Stream = require("stream").Transform,
+//   fs = require("fs");
+// const download = require("image-downloader");
 
 var options = {
   auth: {
@@ -515,24 +515,51 @@ bot
       //     console.error(err);
       //   });
 
-      var download = function(uri, filename, callback) {
-        request.head(uri, function(err, res, body) {
-          console.log("content-type:", res.headers["content-type"]);
-          console.log("content-length:", res.headers["content-length"]);
+      // var download = function(uri, filename, callback) {
+      //   request.head(uri, function(err, res, body) {
+      //     console.log("content-type:", res.headers["content-type"]);
+      //     console.log("content-length:", res.headers["content-length"]);
 
-          request(uri)
-            .pipe(fs.createWriteStream(filename))
-            .on("close", callback);
+      //     request(uri)
+      //       .pipe(fs.createWriteStream(filename))
+      //       .on("close", callback);
+      //   });
+      // };
+
+      // download(
+      //   "https://www.google.com/images/srpr/logo3w.png",
+      //   "google.png",
+      //   function() {
+      //     console.log("done");
+      //   }
+      // );
+
+      function getImages(uri) {
+        var request = require("request");
+        var url = require("url");
+        var cheerio = require("cheerio");
+        var path = require("path");
+        var fs = require("fs");
+
+        request(uri, function(error, response, body) {
+          if (!error && response.statusCode == 200) {
+            $ = cheerio.load(body);
+            imgs = $("img").toArray();
+            console.log("Downloading...");
+            imgs.forEach(function(img) {
+              //console.log(img.attribs.src)
+              process.stdout.write(".");
+              img_url = img.attribs.src;
+              if (/^https?:\/\//.test(img_url)) {
+                img_name = path.basename(img_url);
+                request(img_url).pipe(fs.createWriteStream(img_name));
+              }
+            });
+            console.log("Done!");
+          }
         });
-      };
-
-      download(
-        "https://www.google.com/images/srpr/logo3w.png",
-        "google.png",
-        function() {
-          console.log("done");
-        }
-      );
+      }
+      getImages("http://imgur.com/gallery");
 
       // var download = function(uri, filename, callback) {
       //   request.head(uri, function(err, res, body) {
