@@ -7,19 +7,10 @@ const Store = require("./store");
 const spellService = require("./spell-service");
 var nodemailer = require("nodemailer");
 var sgTransport = require("nodemailer-sendgrid-transport");
-// const fs = require("fs");
 const handlebars = require("handlebars");
 const path = require("path");
 const config = require("./config");
-const request = require("request");
-// const axios = require("axios");
-// var http = require("http"),
-//   Stream = require("stream").Transform,
-//   fs = require("fs");
-// const download = require("image-downloader");
-const http = require("http");
 const fs = require("fs");
-const cp = require("child_process");
 
 var options = {
   auth: {
@@ -75,7 +66,7 @@ bot.on("conversationUpdate", message => {
               body: [
                 {
                   type: "Image",
-                  size: "medium",
+                  size: "small",
                   url:
                     "https://cstcor-cdn-endpoint.azureedge.net/assets//images/logos/constance_logo_rvb.png?v=0.1.2-beta"
                 },
