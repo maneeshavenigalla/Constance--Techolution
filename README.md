@@ -6,10 +6,10 @@ A sample bot integrated with a LUIS.ai application for understanding natural lan
 
 The minimum prerequisites to run this sample are:
 
-* Latest Node.js with NPM. Download it from [here](https://nodejs.org/en/download/).
-* May require `npm install -g windows-build-tools` run in Administrator Windows Powershell for dtrace-provider errors during `npm install`
-* The Bot Framework Emulator. To install the Bot Framework Emulator, download it from [here](https://emulator.botframework.com/). Please refer to [this documentation article](https://github.com/microsoft/botframework-emulator/wiki/Getting-Started) to know more about the Bot Framework Emulator.
-* **[Recommended]** Visual Studio Code for IntelliSense and debugging, download it from [here](https://code.visualstudio.com/) for free.
+- Latest Node.js with NPM. Download it from [here](https://nodejs.org/en/download/).
+- May require `npm install -g windows-build-tools` run in Administrator Windows Powershell for dtrace-provider errors during `npm install`
+- The Bot Framework Emulator. To install the Bot Framework Emulator, download it from [here](https://emulator.botframework.com/). Please refer to [this documentation article](https://github.com/microsoft/botframework-emulator/wiki/Getting-Started) to know more about the Bot Framework Emulator.
+- **[Recommended]** Visual Studio Code for IntelliSense and debugging, download it from [here](https://code.visualstudio.com/) for free.
 
 ### LUIS Application
 
@@ -47,124 +47,22 @@ bot.recognizer(recognizer);
 Intent recognizers return matches as named intents. To match against an intent from a recognizer you pass the name of the intent you want to handle to [IntentDialog.matches()](https://docs.botframework.com/en-us/node/builder/chat-reference/classes/_botbuilder_d_.intentdialog#matches) or use the dialog's [triggerAction()](https://docs.botframework.com/en-us/node/builder/chat-reference/classes/_botbuilder_d_.intentdialog.html#triggeraction) by specifing the intent name with [matches](https://docs.botframework.com/en-us/node/builder/chat-reference/interfaces/_botbuilder_d_.itriggeractionoptions.html#matches) property. See how the bot matches the [`SearchHotels`](app.js#L77), [`ShowHotelsReviews`](app.js#L98) and [`Help`](app.js#L104) intents.
 
 ```javascript
-bot.dialog('SearchHotels', [
+bot
+  .dialog("SearchHotels", [
     // ... waterfall dialog ...
-]).triggerAction({
-    matches: 'SearchHotels'
-});
+  ])
+  .triggerAction({
+    matches: "SearchHotels"
+  });
 
-bot.dialog('ShowHotelsReviews', (session, args) => {
+bot
+  .dialog("Help", session => {
     // ...
-}).triggerAction({
-    matches: 'ShowHotelsReviews'
-});
-
-bot.dialog('Help', session => {
-    // ...
-}).triggerAction({
-    matches: 'Help'
-});
+  })
+  .triggerAction({
+    matches: "Help"
+  });
 ```
-
-### Entity Recognition
-
-LUIS can not only identify a users intention given an utterance, it can extract entities from their utterance as well. Any entities recognized in the users utterance will be passed to the intent handler via its [`args`](https://docs.botframework.com/en-us/node/builder/chat-reference/interfaces/_botbuilder_d_.iintentrecognizerresult) parameter.
-
-Bot Builder includes an [`EntityRecognizer`](https://docs.botframework.com/en-us/node/builder/chat-reference/classes/_botbuilder_d_.entityrecognizer.html) class to simplify working with these entities. You can use [`EntityRecognizer.findEntity()`](https://docs.botframework.com/en-us/node/builder/chat-reference/classes/_botbuilder_d_.entityrecognizer.html#findentity) and [`EntityRecognizer.findAllEntities()`](https://docs.botframework.com/en-us/node/builder/chat-reference/classes/_botbuilder_d_.entityrecognizer.html#findallentities) to search for entities of a specific type by name. Check out how [city and airport entities are extracted](app.js#L38-L39).
-
-```javascript
-const cityEntity = builder.EntityRecognizer.findEntity(args.intent.entities, 'builtin.geography.city');
-const airportEntity = builder.EntityRecognizer.findEntity(args.intent.entities, 'AirportCode');
-```
-
-The `AirportCode` entity makes use of the LUIS Pattern Features which helps LUIS infer entities based on an Regular Expression match, for instance, Airport Codes consist of three consecutive alphabetic characters. You can read more about Pattern Features in the [Add Features](https://www.microsoft.com/cognitive-services/en-us/LUIS-api/documentation/Add-Features#pattern-features) section of the LUIS Help Docs.
-
-![Edit Regex Feature](images/highlights-regex.png)
-
-Another LUIS Model Feature used is Phrase List Features, for instance, the model includes a phrase list named Near which categorizes the words: near, around, close and nearby. Phrase list features work for both words and phrase and what LUIS learns about one phrase will automatically be applied to the others as well.
-
-> Note: Both RegEx and Phrase List are transparent from the Bot's implementation perspective. Think of model features as "hints" used by the Machine Learning algorithm to help categorize and recognize words that compound Entities and Intents.
-
-![Phrase List Feature](images/highlights-phrase.png)
-
-In our sample, we are using a [waterfall dialog](https://docs.microsoft.com/en-us/bot-framework/nodejs/bot-builder-nodejs-dialog-waterfall) for the hotel search. This is a common pattern that you'll likely use for most of your intent handlers. The way waterfalls work in Bot Builder is the very first step of the waterfall is called when a dialog (or in this case intent handler) is triggered. The step then does some work and continues execution of the waterfall by either calling another dialog (like a built-in prompt) or calling the optional `next()` function passed in. When a dialog is called in a step, any result returned from the dialog will be passed as input to the results parameter for the next step.
-
-Our bot tries to check if an entity of city or airport type were [matched and forwards it](app.js#L37-L44) to the next step. If that's not the case, the user is [prompted with a destination](app.js#L47). The [next step](app.js#L50) will receive the destination or airport code in the `results` argument.
-
-```javascript
-bot.dialog('SearchHotels', [
-    (session, args, next) => {
-        session.send(`Welcome to the Hotels finder! We are analyzing your message: 'session.message.text'`);
-        // try extracting entities
-        const cityEntity = builder.EntityRecognizer.findEntity(args.intent.entities, 'builtin.geography.city');
-        const airportEntity = builder.EntityRecognizer.findEntity(args.intent.entities, 'AirportCode');
-        if (cityEntity) {
-            // city entity detected, continue to next step
-            session.dialogData.searchType = 'city';
-            next({ response: cityEntity.entity });
-        } else if (airportEntity) {
-            // airport entity detected, continue to next step
-            session.dialogData.searchType = 'airport';
-            next({ response: airportEntity.entity });
-        } else {
-            // no entities detected, ask user for a destination
-            builder.Prompts.text(session, 'Please enter your destination');
-        }
-    },
-    (session, results) => {
-        const destination = results.response;
-        let message = 'Looking for hotels';
-        if (session.dialogData.searchType === 'airport') {
-            message += ' near %s airport...';
-        } else {
-            message += ' in %s...';
-        }
-        session.send(message, destination);
-        // Async search
-        Store
-            .searchHotels(destination)
-            .then(hotels => {
-                // args
-                session.send(`I found ${hotels.length} hotels:`);
-                let message = new builder.Message()
-                    .attachmentLayout(builder.AttachmentLayout.carousel)
-                    .attachments(hotels.map(hotelAsAttachment));
-                session.send(message);
-                // End
-                session.endDialog();
-            });
-    }
-]).triggerAction({
-    matches: 'SearchHotels',
-    onInterrupted:  session => {
-        session.send('Please provide a destination');
-    }
-});
-```
-
-Similarly, the [`ShowHotelsReviews`](app.js#L83) uses a single closure to search for hotel reviews.
-
-```javascript
-bot.dialog('ShowHotelsReviews', (session, args) => {
-    // retrieve hotel name from matched entities
-    const hotelEntity = builder.EntityRecognizer.findEntity(args.intent.entities, 'Hotel');
-    if (hotelEntity) {
-        session.send(`Looking for reviews of '${hotelEntity.entity}'...`);
-        Store
-            .searchHotelReviews(hotelEntity.entity)
-            .then(reviews => {
-                let message = new builder.Message()
-                    .attachmentLayout(builder.AttachmentLayout.carousel)
-                    .attachments(reviews.map(reviewAsAttachment));
-                session.endDialog(message);
-            });
-    }
-}).triggerAction({
-    matches: 'ShowHotelsReviews'
-});
-```
-
-> **NOTE:** When using an IntentDialog, you should avoid adding a matches() handler for LUIS’s “None” intent. Add a onDefault() handler instead (or a default dialog when using global recognizers). The reason for this is that a LUIS model will often return a very high score for the None intent if it doesn’t understand the users utterance. In the scenario where you’ve configured the IntentDialog with multiple recognizers that could cause the None intent to win out over a non-None intent from a different model that had a slightly lower score. Because of this the LuisRecognizer class suppresses the None intent all together. If you explicitly register a handler for “None” it will never be matched. The onDefault() handler (or the bot's default dialog) however can achieve the same effect because it essentially gets triggered when all of the models reported a top intent of “None”.
 
 ### Spelling Correction
 
@@ -172,54 +70,8 @@ If you want to enable spelling correction, set the `IS_SPELL_CORRECTION_ENABLED`
 
 Microsoft Bing Spell Check API provides a module that allows you to to correct the spelling of the text. Check out the [reference](https://dev.cognitive.microsoft.com/docs/services/56e73033cf5ff80c2008c679/operations/56e73036cf5ff81048ee6727) to know more about the modules available.
 
-[spell-service.js](spell-service.js) is the core component illustrating how to call the Bing Spell Check RESTful API.
-
-In this sample we added spell correction as a middleware. Check out the middleware in [app.js](app.js#L108-L123).
-
-```JavaScript
-if (process.env.IS_SPELL_CORRECTION_ENABLED === 'true') {
-    bot.use({
-        botbuilder: (session, next) => {
-            spellService
-                .getCorrectedText(session.message.text)
-                .then(text => {
-                    session.message.text = text;
-                    next();
-                })
-                .catch(error => {
-                    console.error(error);
-                    next();
-                });
-        }
-    });
-}
-```
-
-## Outcome
-
-You will see the following in the Bot Framework Emulator when opening and running the sample solution.
-
-![Sample Outcome](images/outcome.png)
-
-## More Information
-
-To get more information about how to get started in Bot Builder for Node and LUIS please review the following resources:
-
-* [Bot Builder for Node.js Reference](https://docs.microsoft.com/en-us/bot-framework/nodejs/)
-* [Understanding Natural Language](https://docs.botframework.com/en-us/node/builder/guides/understanding-natural-language/)
-* [LUIS Help Docs](https://www.luis.ai/help#luis-help)
-* [Cognitive Services Documentation](https://docs.microsoft.com/en-us/azure/cognitive-services/luis/home)
-* [IntentDialog](https://docs.botframework.com/en-us/node/builder/chat/IntentDialog/)
-* [EntityRecognizer](https://docs.botframework.com/en-us/node/builder/chat-reference/classes/_botbuilder_d_.entityrecognizer.html)
-* [Alarm Bot in Node](https://github.com/Microsoft/BotBuilder/tree/master/Node/examples/basics-naturalLanguage)
-* [Microsoft Bing Spell Check API](https://www.microsoft.com/cognitive-services/en-us/bing-spell-check-api)
-
-> **Limitations**
-> The functionality provided by the Bot Framework Activity can be used across many channels. Moreover, some special channel features can be unleashed using the [Message.sourceEvent](https://docs.botframework.com/en-us/node/builder/chat-reference/classes/_botbuilder_d_.message.html#sourceevent) method.
->
-> The Bot Framework does its best to support the reuse of your Bot in as many channels as you want. However, due to the very nature of some of these channels, some features are not fully portable.
->
 > The features used in this sample are fully supported in the following channels:
+>
 > - Skype
 > - Facebook
 > - Microsoft Teams
@@ -230,8 +82,10 @@ To get more information about how to get started in Bot Builder for Node and LUI
 > - Telegram
 >
 > They are also supported, with some limitations, in the following channels:
+>
 > - Kik
 > - Email
 >
 > On the other hand, they are not supported and the sample won't work as expected in the following channel:
+>
 > - SMS
