@@ -533,31 +533,31 @@ const wine = [
   {
     name: "Domaine Leroy Chambertin Grand Cru",
     image: "http://top100wine.com.tw/wp-content/uploads/0101-2.jpg",
-    recommended: 5
+    recommended: "⭐️⭐️⭐️⭐️⭐️"
   },
   {
     name: "château d'yquem",
     image:
       "https://assets.catawiki.nl/assets/2018/3/23/c/b/2/cb2312d0-42bd-4ec7-ab33-588abea6d6b3.jpg",
-    recommended: 4.9
+    recommended: "⭐️⭐️⭐️⭐️"
   },
   {
     name: "Masseto",
     image:
       "https://d23ub517d0w8vo.cloudfront.net/uploads/winery/large_image/1191/1191-masseto.jpg",
-    recommended: 4.7
+    recommended: "⭐️⭐️⭐️⭐️"
   },
   {
     name: "Casanova di Neri",
     image:
       "https://d23ub517d0w8vo.cloudfront.net/uploads/winery/large_image/302/302-casanova-di-neri.jpg",
-    recommended: 4.9
+    recommended: "⭐️⭐️⭐️⭐️⭐️⭐️"
   },
   {
     name: "Quintarelli Giuseppe",
     image:
       "https://www.winebtb.com/images/sites/winebtb/labels/giuseppe-quintarelli-amarone-della-valpolicella-classico_1.jpg",
-    recommended: 4.5
+    recommended: "⭐️⭐️⭐️⭐️"
   }
 ];
 

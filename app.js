@@ -594,11 +594,14 @@ bot
       session.send(
         "Thanks a lot for your valuable time. Your booking has been done!!"
       );
+      session.send(
+        `Click on the link below to access your confirmation details: \n${"https://www.rancelab.com/help/11-30-2012_resrvation%20confirmation.zoom97.png"}`
+      );
       var otherServices = new builder.Message(session)
         .text("Do you want to have a look at our other services?")
         .suggestedActions(
           builder.SuggestedActions.create(session, [
-            builder.CardAction.imBack(session, "Restaurant", "Restaurant"),
+            builder.CardAction.imBack(session, "Restaurants", "Restaurants"),
             builder.CardAction.imBack(session, "Golf", "Golf"),
             builder.CardAction.imBack(session, "Wine", "Wine"),
             builder.CardAction.imBack(
