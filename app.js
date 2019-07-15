@@ -684,7 +684,7 @@ bot
                 .text(`Recommended - ${wine.recommended}`)
                 .images([builder.CardImage.create(session, wine.image)])
                 .buttons([
-                  builder.CardAction.imBack(session, wine.name, "Book now")
+                  builder.CardAction.imBack(session, wine.name, "Buy now")
                 ]);
             })
           );
@@ -779,6 +779,9 @@ bot
     (session, results) => {
       session.send(
         "Your booking has been done. You`ll receive the order in the next 30 mins."
+      );
+      session.send(
+        `Click on the link below to access your confirmation details: \n${"https://www.rancelab.com/help/11-30-2012_resrvation%20confirmation.zoom97.png"}`
       );
       var otherServices = new builder.Message(session)
         .text("Do you want to have a look at our other services?")
