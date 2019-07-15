@@ -366,11 +366,7 @@ bot
           .suggestedActions(
             builder.SuggestedActions.create(session, [
               builder.CardAction.imBack(session, "Services", "Services"),
-              builder.CardAction.imBack(
-                session,
-                "Not interested",
-                "Not interested"
-              )
+              builder.CardAction.imBack(session, "Maybe later", "Maybe later")
             ])
           );
         session.send(servicesOpted);
@@ -383,11 +379,7 @@ bot
           .suggestedActions(
             builder.SuggestedActions.create(session, [
               builder.CardAction.imBack(session, "Services", "Services"),
-              builder.CardAction.imBack(
-                session,
-                "Not interested",
-                "Not interested"
-              )
+              builder.CardAction.imBack(session, "Maybe later", "Maybe later")
             ])
           );
         session.send(servicesOpted);
@@ -604,11 +596,7 @@ bot
             builder.CardAction.imBack(session, "Restaurants", "Restaurants"),
             builder.CardAction.imBack(session, "Golf", "Golf"),
             builder.CardAction.imBack(session, "Wine", "Wine"),
-            builder.CardAction.imBack(
-              session,
-              "Not interested",
-              "Not interested"
-            )
+            builder.CardAction.imBack(session, "Maybe later", "Maybe later")
           ])
         );
       session.send(otherServices);
@@ -791,11 +779,7 @@ bot
         .suggestedActions(
           builder.SuggestedActions.create(session, [
             builder.CardAction.imBack(session, "Services", "Services"),
-            builder.CardAction.imBack(
-              session,
-              "Not interested",
-              "Not interested"
-            )
+            builder.CardAction.imBack(session, "Maybe later", "Maybe later")
           ])
         );
       session.send(otherServices);
@@ -810,11 +794,7 @@ bot
 bot
   .dialog("EndGreetings", [
     (session, args, next) => {
-      if (session.message.text === "Not interested") {
-        session.send("Have a nice day");
-      } else {
-        session.send("Thank you! I`m glad I could be of some help!!");
-      }
+      session.send("Thank you! Have a nice day!!");
     }
   ])
   .triggerAction({

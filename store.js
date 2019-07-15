@@ -457,7 +457,7 @@ const restaurants = [
     id: 0,
     cuisine: "Arabian",
     timings: "12am to 10pm",
-    rating: 4.8,
+    rating: "⭐️⭐️⭐️⭐️⭐️",
     specials: "Chicken kebab",
     RestaurantName: "Golf Arabia",
     resImage:
@@ -470,7 +470,7 @@ const restaurants = [
     cuisine: "Italian",
     timings: "6am to 8pm",
     specials: "Pizza",
-    rating: 4.9,
+    rating: "⭐️⭐️⭐️⭐️",
     RestaurantName: "Italy in Halaveli",
     resImage:
       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRsqaFKcBzMVbkkcO6ZfUgx9S6rtSgriE0tisRufBrhrXBdnCyE",
@@ -482,7 +482,7 @@ const restaurants = [
     cuisine: "Indian",
     timings: "6am to 11pm",
     specials: "Dum ki Biriyani",
-    rating: 5,
+    rating: "⭐️⭐️⭐️⭐️⭐️⭐️",
     RestaurantName: "Maharaja Palace",
     resImage:
       "https://images.unsplash.com/photo-1552590635-27c2c2128abf?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60",
@@ -493,7 +493,7 @@ const restaurants = [
     cuisine: "Chinese",
     timings: "7am to 9:30pm",
     specials: "Noodles",
-    rating: 4.7,
+    rating: "⭐️⭐️⭐️⭐️⭐️",
     RestaurantName: "Bow to the dragon",
     resMenu:
       "https://static1.squarespace.com/static/54ef23dae4b04ae51565fa03/t/5ac4a73488251b86bcbe42b9/1522837317771/Menu+3.0-page-001.jpg",
@@ -504,7 +504,7 @@ const restaurants = [
     id: 5,
     cuisine: "Thai",
     timings: "11am to 11pm",
-    rating: 4.7,
+    rating: "⭐⭐️⭐️⭐️⭐️",
     specials: "Thai fried rice",
     RestaurantName: "Phuket & kraby",
     resImage:
