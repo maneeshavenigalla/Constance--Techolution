@@ -606,8 +606,6 @@ bot
     matches: "NoOfIndividuals"
   });
 
-//Booking Slot
-
 //Reservation Confirmation
 
 bot
