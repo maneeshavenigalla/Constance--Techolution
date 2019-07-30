@@ -1,16 +1,16 @@
 // This loads the environment variables from the .env file
-require("dotenv-extended").load();
+require('dotenv-extended').load();
 
-const builder = require("botbuilder");
-const restify = require("restify");
-const Store = require("./store");
-const spellService = require("./spell-service");
-var nodemailer = require("nodemailer");
-var sgTransport = require("nodemailer-sendgrid-transport");
-const handlebars = require("handlebars");
-const path = require("path");
-const config = require("./config");
-const fs = require("fs");
+const builder = require('botbuilder');
+const restify = require('restify');
+const Store = require('./store');
+const spellService = require('./spell-service');
+var nodemailer = require('nodemailer');
+var sgTransport = require('nodemailer-sendgrid-transport');
+const handlebars = require('handlebars');
+const path = require('path');
+const config = require('./config');
+const fs = require('fs');
 
 var options = {
   auth: {
@@ -33,7 +33,7 @@ const connector = new builder.ChatConnector({
   appId: process.env.MICROSOFT_APP_ID,
   appPassword: process.env.MICROSOFT_APP_PASSWORD
 });
-server.post("/api/messages", connector.listen());
+server.post('/api/messages', connector.listen());
 
 // Default store: volatile in-memory store - Only for prototyping!
 var inMemoryStorage = new builder.MemoryBotStorage();
@@ -42,7 +42,7 @@ var bot = new builder.UniversalBot(connector, function(session) {
     "Sorry, I did not understand '%s'. Type 'help' if you need assistance.",
     session.message.text
   );
-}).set("storage", inMemoryStorage); // Register in memory storage
+}).set('storage', inMemoryStorage); // Register in memory storage
 
 // You can provide your own model by specifing the 'LUIS_MODEL_URL' environment variable
 // This Url can be obtained by uploading or creating your model from the LUIS portal: https://www.luis.ai/
@@ -51,27 +51,27 @@ bot.recognizer(recognizer);
 
 // On Bot open
 
-bot.on("conversationUpdate", message => {
+bot.on('conversationUpdate', message => {
   if (message.membersAdded) {
     message.membersAdded.forEach(function(identity) {
       if (identity.id === message.address.bot.id) {
         const welcomeCard = new builder.Message()
           .address(message.address)
           .addAttachment({
-            contentType: "application/vnd.microsoft.card.adaptive",
+            contentType: 'application/vnd.microsoft.card.adaptive',
             content: {
-              type: "AdaptiveCard",
+              type: 'AdaptiveCard',
               speak:
                 "<s>Your  meeting about \"Adaptive Card design session\"<break strength='weak'/> is starting at 12:30pm</s><s>Do you want to snooze <break strength='weak'/> or do you want to send a late notification to the attendees?</s>",
               body: [
                 {
-                  type: "Image",
-                  size: "small",
+                  type: 'Image',
+                  size: 'small',
                   url:
-                    "https://cstcor-cdn-endpoint.azureedge.net/assets//images/logos/constance_logo_rvb.png?v=0.1.2-beta"
+                    'https://cstcor-cdn-endpoint.azureedge.net/assets//images/logos/constance_logo_rvb.png?v=0.1.2-beta'
                 },
                 {
-                  type: "TextBlock",
+                  type: 'TextBlock',
                   text: `Welcome to Constance Bot! Your friendly Bot!\n\n Type "hi" to start a conversation`
                 }
               ]
@@ -87,59 +87,195 @@ bot.on("conversationUpdate", message => {
 // Greetings
 
 bot
-  .dialog("Greetings", session => {
+  .dialog('Greetings', session => {
     var msg = new builder.Message(session)
-      .text("Hello there! How can I assist you today?")
+      .text('Hello there! How can I assist you today?')
       .suggestedActions(
         builder.SuggestedActions.create(session, [
-          builder.CardAction.imBack(session, "Hotel Booking", "Hotel Booking"),
-          builder.CardAction.imBack(session, "Services", "Services")
+          builder.CardAction.imBack(session, 'Hotel Booking', 'Hotel Booking'),
+          builder.CardAction.imBack(session, 'Services', 'Services')
         ])
       );
     session.send(msg);
   })
   .triggerAction({
-    matches: "Greetings"
+    matches: 'Greetings'
+  });
+
+//Reference number
+
+bot
+  .dialog('HasReference', [
+    (session, args, next) => {
+      var purpose = new builder.Message(session)
+        .text('Do you already have a reference ID?')
+        .suggestedActions(
+          builder.SuggestedActions.create(session, [
+            builder.CardAction.imBack(
+              session,
+              'Yes, I have a reference ID',
+              'Yes, I have a reference ID'
+            ),
+            builder.CardAction.imBack(
+              session,
+              'Book me a hotel',
+              'Book me a hotel'
+            )
+          ])
+        );
+      session.send(purpose);
+      next({ args: session.message.text });
+    },
+    (session, results) => {
+      console.log('Results', results);
+      if (results.args === 'Yes, I have a reference ID') {
+        session.send('Please submit your reference ID');
+      }
+    }
+  ])
+  .triggerAction({
+    matches: 'HasReference'
+  });
+
+//Submit reference
+
+bot
+  .dialog('ReferenceSubmit', session => {
+    var msg = session.send('Please submit your reference number');
+    session.send(msg);
+  })
+  .triggerAction({
+    matches: 'ReferenceSubmit'
+  });
+
+//Reference
+bot
+  .dialog('Reference', session => {
+    const message = `Here are your booking details for reference number: ${
+      session.message.text
+    }`;
+    session.send(message);
+
+    Store.hotelReferenceDetails().then(details => {
+      const msg = new builder.Message(session).addAttachment({
+        contentType: 'application/vnd.microsoft.card.adaptive',
+        content: {
+          type: 'AdaptiveCard',
+          speak:
+            "<s>Your  meeting about \"Adaptive Card design session\"<break strength='weak'/> is starting at 12:30pm</s><s>Do you want to snooze <break strength='weak'/> or do you want to send a late notification to the attendees?</s>",
+
+          body: [
+            {
+              type: 'ColumnSet',
+              columns: [
+                {
+                  type: 'Column',
+                  width: 2,
+                  items: [
+                    {
+                      type: 'TextBlock',
+                      text: 'HOTEL BOOKING DETAILS',
+                      weight: 'bolder'
+                    },
+                    {
+                      type: 'TextBlock',
+                      text: `Name - ${details[0].name}`,
+                      weight: 'bold',
+                      spacing: 'none'
+                    },
+                    {
+                      type: 'TextBlock',
+                      text: `Duration - ${details[0].duration}`,
+                      size: 'small'
+                    },
+                    {
+                      type: 'TextBlock',
+                      text: `Room type - ${details[0].roomType}`,
+                      size: 'small'
+                    },
+                    {
+                      type: 'TextBlock',
+                      text: `Hotel name - ${details[0].hotelName}`,
+                      size: 'small'
+                    }
+                  ]
+                },
+                {
+                  type: 'Column',
+                  width: 1,
+                  items: [
+                    {
+                      type: 'Image',
+                      url: details[0].image,
+                      size: 'auto'
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      });
+
+      session.send(msg);
+
+      const transportation = new builder.Message(session)
+        .text('Do you want to have a look at our private transfer facility?')
+        .suggestedActions(
+          builder.SuggestedActions.create(session, [
+            builder.CardAction.imBack(
+              session,
+              'Yes, that would be lovely',
+              'Yes, that would be lovely'
+            ),
+            builder.CardAction.imBack(session, 'No, thank you', 'No, thank you')
+          ])
+        );
+      session.send(transportation);
+    });
+  })
+  .triggerAction({
+    matches: 'Reference'
   });
 
 //Purpose of the trip
 
 bot
-  .dialog("Purpose", (session, args, next) => {
+  .dialog('Purpose', (session, args, next) => {
     var purpose = new builder.Message(session)
-      .text(" Please select the purpose of your visit :")
+      .text(' Please select the purpose of your visit :')
       .suggestedActions(
         builder.SuggestedActions.create(session, [
-          builder.CardAction.imBack(session, "Business", "Business"),
-          builder.CardAction.imBack(session, "Personal", "Personal")
+          builder.CardAction.imBack(session, 'Business', 'Business'),
+          builder.CardAction.imBack(session, 'Personal', 'Personal')
         ])
       );
     session.send(purpose);
   })
   .triggerAction({
-    matches: "Purpose"
+    matches: 'Purpose'
   });
 
 //Search location
 
 bot
-  .dialog("Locations", [
+  .dialog('Locations', [
     (session, args, next) => {
-      session.send("Thank you for choosing us!");
+      session.send('Thank you for choosing us!');
       next();
     },
     (session, args, next) => {
       const location = new builder.Message(session)
         .text(
-          "What is your preferred location? Please select from the choices below:"
+          'What is your preferred location? Please select from the choices below:'
         )
         .suggestedActions(
           builder.SuggestedActions.create(session, [
-            builder.CardAction.imBack(session, "Mauritius", "Mauritius"),
-            builder.CardAction.imBack(session, "Seychelles", "Seychelles"),
-            builder.CardAction.imBack(session, "Madagascar", "Madagascar"),
-            builder.CardAction.imBack(session, "Maldives", "Maldives"),
-            builder.CardAction.imBack(session, "Zanzibar", "Zanzibar")
+            builder.CardAction.imBack(session, 'Mauritius', 'Mauritius'),
+            builder.CardAction.imBack(session, 'Seychelles', 'Seychelles'),
+            builder.CardAction.imBack(session, 'Madagascar', 'Madagascar'),
+            builder.CardAction.imBack(session, 'Maldives', 'Maldives'),
+            builder.CardAction.imBack(session, 'Zanzibar', 'Zanzibar')
           ])
         );
 
@@ -147,13 +283,13 @@ bot
     }
   ])
   .triggerAction({
-    matches: "Locations"
+    matches: 'Locations'
   });
 
 //Search hotels
 
 bot
-  .dialog("SearchHotels", [
+  .dialog('SearchHotels', [
     (session, args, next) => {
       const message = `Looking for hotels in ${session.message.text}`;
       const preferredLocation = session.message.text;
@@ -179,7 +315,7 @@ bot
                   builder.CardAction.imBack(
                     session,
                     hotel.hotelName,
-                    "Choose Hotel"
+                    'Choose Hotel'
                   )
                 ]);
             })
@@ -193,13 +329,13 @@ bot
     }
   ])
   .triggerAction({
-    matches: "SearchHotels"
+    matches: 'SearchHotels'
   });
 
 //Hotel Query
 
 bot
-  .dialog("HotelQuery", [
+  .dialog('HotelQuery', [
     (session, args, next) => {
       const roomPrompt = `We are fetching available rooms for you in ${
         session.message.text
@@ -207,7 +343,7 @@ bot
       session.send(roomPrompt, session.message.text);
       // Async search
       Store.searchRooms(session.message.text).then(rooms => {
-        session.send("Pls choose one of the following room types:");
+        session.send('Pls choose one of the following room types:');
         let message = new builder.Message()
           .attachmentLayout(builder.AttachmentLayout.carousel)
           .attachments(
@@ -221,7 +357,7 @@ bot
                 )
                 .images([builder.CardImage.create(session, room.roomImage)])
                 .buttons([
-                  builder.CardAction.imBack(session, room.roomType, "Book now")
+                  builder.CardAction.imBack(session, room.roomType, 'Book now')
                 ]);
             })
           );
@@ -233,44 +369,44 @@ bot
     }
   ])
   .triggerAction({
-    matches: "HotelQuery"
+    matches: 'HotelQuery'
   });
 
 //Ask number of rooms
 bot
-  .dialog("NumberOfDays", [
+  .dialog('NumberOfDays', [
     (session, args, next) => {
-      session.send("Can you enter the duration of your stay?");
+      session.send('Can you enter the duration of your stay?');
     }
   ])
   .triggerAction({
-    matches: "NumberOfDays"
+    matches: 'NumberOfDays'
   });
 
 //Booking Date
 
 bot
-  .dialog("BookingDate", [
+  .dialog('BookingDate', [
     (session, args, next) => {
-      session.send("Please enter your date of arrival in dd/mm/yyyy format?");
+      session.send('Please enter your date of arrival in dd/mm/yyyy format?');
       userData.roomType = session.message.text;
     }
   ])
   .triggerAction({
-    matches: "BookingDate"
+    matches: 'BookingDate'
   });
 
 //ConfirmBooking
 
 bot
-  .dialog("ConfirmBooking", [
+  .dialog('ConfirmBooking', [
     (session, args, next) => {
       const ConfirmDialog = new builder.Message(session)
         .text(`Do you want me to confirm booking on: ${session.message.text}?`)
         .suggestedActions(
           builder.SuggestedActions.create(session, [
-            builder.CardAction.imBack(session, "Yes", "Yes"),
-            builder.CardAction.imBack(session, "No", "No")
+            builder.CardAction.imBack(session, 'Yes', 'Yes'),
+            builder.CardAction.imBack(session, 'No', 'No')
           ])
         );
       userData.arrivalDate = session.message.text;
@@ -279,47 +415,47 @@ bot
     }
   ])
   .triggerAction({
-    matches: "ConfirmBooking"
+    matches: 'ConfirmBooking'
   });
 
 //Booking Details
 
 bot
-  .dialog("BookingDetails", [
+  .dialog('BookingDetails', [
     (session, args, next) => {
-      if (session.message.text === "No") {
+      if (session.message.text === 'No') {
         session.send(
-          "We`ll miss you! Please consider us for your future bookings"
+          'We`ll miss you! Please consider us for your future bookings'
         );
       } else {
         session.send(
-          "Please enter your email below to continue with the reservation:"
+          'Please enter your email below to continue with the reservation:'
         );
       }
     }
   ])
   .triggerAction({
-    matches: "BookingDetails"
+    matches: 'BookingDetails'
   });
 
 //Confirm Mailer
 
 bot
-  .dialog("Mailer", [
+  .dialog('Mailer', [
     (session, args, next) => {
       let templateString1 = fs.readFileSync(
-        path.join(__dirname, "mailer", "index.handlebars"),
-        "utf8"
+        path.join(__dirname, 'mailer', 'index.handlebars'),
+        'utf8'
       );
       let fn1 = handlebars.compile(templateString1);
 
       let templateData1 = userData;
 
       var emailDetails = {
-        from: "booking@techolution.com",
+        from: 'booking@techolution.com',
         to: session.message.text,
-        subject: "Hotel Booking",
-        text: "Constance Hospitality",
+        subject: 'Hotel Booking',
+        text: 'Constance Hospitality',
         html: fn1(templateData1)
       };
 
@@ -336,50 +472,50 @@ bot
 
       const transportation = new builder.Message(session)
         .text(
-          "We have mailed your booking details. Please check your mail for further assistance.\nDo you want me to help you with the transportation?"
+          'We have mailed your booking details. Please check your mail for further assistance.\nDo you want me to help you with the transportation?'
         )
         .suggestedActions(
           builder.SuggestedActions.create(session, [
             builder.CardAction.imBack(
               session,
-              "Yes, that would be lovely",
-              "Yes, that would be lovely"
+              'Yes, that would be lovely',
+              'Yes, that would be lovely'
             ),
-            builder.CardAction.imBack(session, "No, thank you", "No, thank you")
+            builder.CardAction.imBack(session, 'No, thank you', 'No, thank you')
           ])
         );
       session.send(transportation);
     }
   ])
   .triggerAction({
-    matches: "Mailer"
+    matches: 'Mailer'
   });
 
 //FlightDetails
 
 bot
-  .dialog("FlightDetails", [
+  .dialog('FlightDetails', [
     (session, args, next) => {
-      if (session.message.text === "No, thank you") {
+      if (session.message.text === 'No, thank you') {
         const servicesOpted = new builder.Message(session)
-          .text("Do you want to look at the services provided?")
+          .text('Do you want to look at the services provided?')
           .suggestedActions(
             builder.SuggestedActions.create(session, [
-              builder.CardAction.imBack(session, "Services", "Services"),
-              builder.CardAction.imBack(session, "Maybe later", "Maybe later")
+              builder.CardAction.imBack(session, 'Services', 'Services'),
+              builder.CardAction.imBack(session, 'Maybe later', 'Maybe later')
             ])
           );
         session.send(servicesOpted);
       } else {
         session.send(
-          "Kindly send your flight details to support@constance.com"
+          `Kindly send your flight details to support@constance.com. A limo with number 1234 shall be arranged for you.`
         );
         const servicesOpted = new builder.Message(session)
-          .text("Do you want to look at the services provided?")
+          .text('Do you want to look at the services provided?')
           .suggestedActions(
             builder.SuggestedActions.create(session, [
-              builder.CardAction.imBack(session, "Services", "Services"),
-              builder.CardAction.imBack(session, "Maybe later", "Maybe later")
+              builder.CardAction.imBack(session, 'Services', 'Services'),
+              builder.CardAction.imBack(session, 'Maybe later', 'Maybe later')
             ])
           );
         session.send(servicesOpted);
@@ -387,33 +523,33 @@ bot
     }
   ])
   .triggerAction({
-    matches: "FlightDetails"
+    matches: 'FlightDetails'
   });
 
 //AdditionalQueries
 
 bot
-  .dialog("AdditionalQueries", [
+  .dialog('AdditionalQueries', [
     (session, args, next) => {
       const typesOfServices = new builder.Message(session)
-        .text("Welcome to our services! What type of service do you need?")
+        .text('Welcome to our services! What type of service do you need?')
         .suggestedActions(
           builder.SuggestedActions.create(session, [
-            builder.CardAction.imBack(session, "Restaurants", "Restaurants"),
-            builder.CardAction.imBack(session, "Golf", "Golf"),
-            builder.CardAction.imBack(session, "Wine", "Wine")
+            builder.CardAction.imBack(session, 'Restaurants', 'Restaurants'),
+            builder.CardAction.imBack(session, 'Golf', 'Golf'),
+            builder.CardAction.imBack(session, 'Wine', 'Wine')
           ])
         );
       session.send(typesOfServices);
     }
   ])
   .triggerAction({
-    matches: "AdditionalQueries"
+    matches: 'AdditionalQueries'
   });
 
 //Restaurants
 bot
-  .dialog("Restaurants", [
+  .dialog('Restaurants', [
     (session, args, next) => {
       // Async search
       Store.searchRestaurants().then(restaurant => {
@@ -429,7 +565,7 @@ bot
                 .subtitle(`${rest.specials}\n${rest.rating}`)
                 .images([builder.CardImage.create(session, rest.image)])
                 .buttons([
-                  builder.CardAction.imBack(session, rest.name, "View Menu")
+                  builder.CardAction.imBack(session, rest.name, 'View Menu')
                 ]);
             })
           );
@@ -441,12 +577,12 @@ bot
     }
   ])
   .triggerAction({
-    matches: "Restaurants"
+    matches: 'Restaurants'
   });
 
 //PromptMenu
 bot
-  .dialog("NameOfRestaurant", [
+  .dialog('NameOfRestaurant', [
     (session, args, next) => {
       const preferredRestaurant = session.message.text;
       // Async search
@@ -462,11 +598,11 @@ bot
                 .buttons([
                   builder.CardAction.imBack(
                     session,
-                    "Download menu",
-                    "Download menu"
+                    'Download menu',
+                    'Download menu'
                   ),
 
-                  builder.CardAction.imBack(session, "Book Table", "Book Table")
+                  builder.CardAction.imBack(session, 'Book Table', 'Book Table')
                 ]);
             })
           );
@@ -476,34 +612,34 @@ bot
     }
   ])
   .triggerAction({
-    matches: "NameOfRestaurant"
+    matches: 'NameOfRestaurant'
   });
 
 //Download menu
 
 bot
-  .dialog("MenuMail", [
+  .dialog('MenuMail', [
     async (session, args, next) => {
-      session.send("Click on the link below to access the menu");
+      session.send('Click on the link below to access the menu');
 
       const urk =
-        "https://ugcorigin.s-microsoft.com/100/d83cbe4e-75f7-4bca-b785-fbc381375700/200/v5/image.jpg";
+        'https://ugcorigin.s-microsoft.com/100/d83cbe4e-75f7-4bca-b785-fbc381375700/200/v5/image.jpg';
 
       session.send(`${urk}`);
     }
   ])
   .triggerAction({
-    matches: "MenuMail"
+    matches: 'MenuMail'
   });
 
 //No Of Individuals
 
 bot
-  .dialog("NoOfIndividuals", [
+  .dialog('NoOfIndividuals', [
     (session, args, next) => {
       if (session.message && session.message.value) {
         function processSubmitAction(session, value) {
-          var defaultErrorMessage = "Please enter a value";
+          var defaultErrorMessage = 'Please enter a value';
           if (!value.noGuests) {
             session.send(defaultErrorMessage);
             return false;
@@ -519,51 +655,51 @@ bot
       }
       // Display Welcome card with Hotels and Flights search options
       var card = {
-        contentType: "application/vnd.microsoft.card.adaptive",
+        contentType: 'application/vnd.microsoft.card.adaptive',
         content: {
-          $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
-          type: "AdaptiveCard",
-          version: "1.0",
+          $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
+          type: 'AdaptiveCard',
+          version: '1.0',
           body: [
             {
-              type: "ColumnSet",
+              type: 'ColumnSet',
               columns: [
                 {
-                  type: "Column",
+                  type: 'Column',
                   width: 2,
                   items: [
                     {
-                      type: "TextBlock",
-                      text: "Please fill the following details:",
-                      weight: "bolder",
-                      size: "medium"
+                      type: 'TextBlock',
+                      text: 'Please fill the following details:',
+                      weight: 'bolder',
+                      size: 'medium'
                     },
                     {
-                      type: "TextBlock",
-                      text: "Number of Individuals"
+                      type: 'TextBlock',
+                      text: 'Number of Individuals'
                     },
                     {
-                      type: "Input.Number",
-                      id: "noGuests",
-                      placeholder: "Please enter a value"
+                      type: 'Input.Number',
+                      id: 'noGuests',
+                      placeholder: 'Please enter a value'
                     },
                     {
-                      type: "TextBlock",
-                      text: "Please enter your booking date"
+                      type: 'TextBlock',
+                      text: 'Please enter your booking date'
                     },
                     {
-                      type: "Input.Date",
-                      id: "bookingDate",
-                      placeholder: "Please enter a value"
+                      type: 'Input.Date',
+                      id: 'bookingDate',
+                      placeholder: 'Please enter a value'
                     },
                     {
-                      type: "TextBlock",
-                      text: "Please enter your booking time"
+                      type: 'TextBlock',
+                      text: 'Please enter your booking time'
                     },
                     {
-                      type: "Input.Time",
-                      id: "bookingTime",
-                      placeholder: "Please enter a value"
+                      type: 'Input.Time',
+                      id: 'bookingTime',
+                      placeholder: 'Please enter a value'
                     }
                   ]
                 }
@@ -572,8 +708,8 @@ bot
           ],
           actions: [
             {
-              type: "Action.Submit",
-              title: "Submit"
+              type: 'Action.Submit',
+              title: 'Submit'
             }
           ]
         }
@@ -584,43 +720,43 @@ bot
     },
     (session, results) => {
       session.send(
-        "Thanks a lot for your valuable time. Your booking has been done!!"
+        'Thanks a lot for your valuable time. Your booking has been done!!'
       );
       session.send(
-        `Click on the link below to access your confirmation details: \n${"https://www.rancelab.com/help/11-30-2012_resrvation%20confirmation.zoom97.png"}`
+        `Click on the link below to access your confirmation details: \n${'https://www.rancelab.com/help/11-30-2012_resrvation%20confirmation.zoom97.png'}`
       );
       var otherServices = new builder.Message(session)
-        .text("Do you want to have a look at our other services?")
+        .text('Do you want to have a look at our other services?')
         .suggestedActions(
           builder.SuggestedActions.create(session, [
-            builder.CardAction.imBack(session, "Restaurants", "Restaurants"),
-            builder.CardAction.imBack(session, "Golf", "Golf"),
-            builder.CardAction.imBack(session, "Wine", "Wine"),
-            builder.CardAction.imBack(session, "Maybe later", "Maybe later")
+            builder.CardAction.imBack(session, 'Restaurants', 'Restaurants'),
+            builder.CardAction.imBack(session, 'Golf', 'Golf'),
+            builder.CardAction.imBack(session, 'Wine', 'Wine'),
+            builder.CardAction.imBack(session, 'Maybe later', 'Maybe later')
           ])
         );
       session.send(otherServices);
     }
   ])
   .triggerAction({
-    matches: "NoOfIndividuals"
+    matches: 'NoOfIndividuals'
   });
 
 //Reservation Confirmation
 
 bot
-  .dialog("ConfirmReservation", [
+  .dialog('ConfirmReservation', [
     (session, args, next) => {
-      session.send("A confirmation mail has been sent to your email ID");
+      session.send('A confirmation mail has been sent to your email ID');
     }
   ])
   .triggerAction({
-    matches: "ConfirmReservation"
+    matches: 'ConfirmReservation'
   });
 
 //Golf
 bot
-  .dialog("Golf", [
+  .dialog('Golf', [
     (session, args, next) => {
       Store.GolfService().then(golfItem => {
         // args
@@ -642,7 +778,7 @@ bot
                 )
                 .images([builder.CardImage.create(session, golf.image)])
                 .buttons([
-                  builder.CardAction.imBack(session, "Book now", "Book now")
+                  builder.CardAction.imBack(session, 'Book now', 'Book now')
                 ]);
             })
           );
@@ -655,25 +791,75 @@ bot
     }
   ])
   .triggerAction({
-    matches: "Golf"
+    matches: 'Golf'
   });
 
 //Wine
 bot
-  .dialog("Wine", [
+  .dialog('Wine', [
     (session, args, next) => {
-      Store.WineService().then(wineItem => {
+      if (
+        session.message.text === 'Glass' ||
+        session.message.text === 'Bottle'
+      ) {
+        const typeOfWine = new builder.Message(session)
+          .text('Please select your choice:')
+          .suggestedActions(
+            builder.SuggestedActions.create(session, [
+              builder.CardAction.imBack(session, 'Red wine', 'Red wine'),
+              builder.CardAction.imBack(session, 'White wine', 'White wine'),
+              builder.CardAction.imBack(
+                session,
+                'Sparkling wine',
+                'Sparkling wine'
+              ),
+              builder.CardAction.imBack(session, 'Rose wine', 'Rose wine')
+            ])
+          );
+        session.send(typeOfWine);
+      } else if (
+        session.message.text === 'Red wine' ||
+        session.message.text === 'White wine' ||
+        session.message.text === 'Sparkling wine' ||
+        session.message.text === 'Rose wine'
+      ) {
+
+        userData.wineChoice = session.message.text;
+        const wineLocation = new builder.Message(session)
+          .text('Select one of the choices below:')
+          .suggestedActions(
+            builder.SuggestedActions.create(session, [
+              builder.CardAction.imBack(session, 'French', 'French'),
+              builder.CardAction.imBack(session, 'Italian', 'Italian'),
+              builder.CardAction.imBack(session, 'Australian', 'Australian')
+            ])
+          );
+        session.send(wineLocation);
+      } else if (session.message.text === 'Wine'){
+        const quantity = new builder.Message(session)
+          .text('Please select your preferred quantity:')
+          .suggestedActions(
+            builder.SuggestedActions.create(session, [
+              builder.CardAction.imBack(session, 'Glass', 'Glass'),
+              builder.CardAction.imBack(session, 'Bottle', 'Bottle')
+            ])
+          );
+        session.send(quantity);
+      } else{
+        userData.wineOrigin = session.message.text;
+         Store.WineService(userData.wineChoice,userData.wineOrigin).then(wineItem => {
         // args
         let message = new builder.Message()
           .attachmentLayout(builder.AttachmentLayout.carousel)
           .attachments(
             wineItem.map(wine => {
               return new builder.HeroCard(session)
-                .title(`${wine.name}`)
+                .title(`${wine.type}`)
+                .subtitle(`${wine.name} \n Age - ${wine.age}`)
                 .text(`Recommended - ${wine.recommended}`)
                 .images([builder.CardImage.create(session, wine.image)])
                 .buttons([
-                  builder.CardAction.imBack(session, wine.name, "Buy now")
+                  builder.CardAction.imBack(session, wine.name, 'Buy now')
                 ]);
             })
           );
@@ -682,20 +868,21 @@ bot
         // End
         session.endDialog();
       });
+      }
     }
   ])
   .triggerAction({
-    matches: "Wine"
+    matches: 'Wine'
   });
 
 //Wine Booking
 
 bot
-  .dialog("WineBooking", [
+  .dialog('WineBooking', [
     (session, args, next) => {
       if (session.message && session.message.value) {
         function processSubmitAction(session, value) {
-          var defaultErrorMessage = "Please enter a value";
+          var defaultErrorMessage = 'Please enter a value';
           if (!value.noUnits) {
             session.send(defaultErrorMessage);
             return false;
@@ -711,42 +898,42 @@ bot
       }
       // Display Welcome card with Hotels and Flights search options
       var card = {
-        contentType: "application/vnd.microsoft.card.adaptive",
+        contentType: 'application/vnd.microsoft.card.adaptive',
         content: {
-          $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
-          type: "AdaptiveCard",
-          version: "1.0",
+          $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
+          type: 'AdaptiveCard',
+          version: '1.0',
           body: [
             {
-              type: "ColumnSet",
+              type: 'ColumnSet',
               columns: [
                 {
-                  type: "Column",
+                  type: 'Column',
                   width: 2,
                   items: [
                     {
-                      type: "TextBlock",
-                      text: "Please enter the following details!",
-                      weight: "bolder",
-                      size: "medium"
+                      type: 'TextBlock',
+                      text: 'Please enter the following details!',
+                      weight: 'bolder',
+                      size: 'medium'
                     },
                     {
-                      type: "TextBlock",
-                      text: "Please enter number of units:"
+                      type: 'TextBlock',
+                      text: 'Please enter number of units:'
                     },
                     {
-                      type: "Input.Number",
-                      id: "noUnits",
-                      placeholder: "Please enter number of units"
+                      type: 'Input.Number',
+                      id: 'noUnits',
+                      placeholder: 'Please enter number of units'
                     },
                     {
-                      type: "TextBlock",
-                      text: "Please enter your room number:"
+                      type: 'TextBlock',
+                      text: 'Please enter your room number:'
                     },
                     {
-                      type: "Input.Text",
-                      id: "bookingTime",
-                      placeholder: "Please enter your Room Number"
+                      type: 'Input.Text',
+                      id: 'bookingTime',
+                      placeholder: 'Please enter your Room Number'
                     }
                   ]
                 }
@@ -755,8 +942,8 @@ bot
           ],
           actions: [
             {
-              type: "Action.Submit",
-              title: "Submit"
+              type: 'Action.Submit',
+              title: 'Submit'
             }
           ]
         }
@@ -767,40 +954,40 @@ bot
     },
     (session, results) => {
       session.send(
-        "Your booking has been done. You`ll receive the order in the next 30 mins."
+        'Your booking has been done. You`ll receive the order in the next 30 mins.'
       );
       session.send(
-        `Click on the link below to access your confirmation details: \n${"https://www.rancelab.com/help/11-30-2012_resrvation%20confirmation.zoom97.png"}`
+        `Click on the link below to access your confirmation details: \n${'https://www.rancelab.com/help/11-30-2012_resrvation%20confirmation.zoom97.png'}`
       );
       var otherServices = new builder.Message(session)
-        .text("Do you want to have a look at our other services?")
+        .text('Do you want to have a look at our other services?')
         .suggestedActions(
           builder.SuggestedActions.create(session, [
-            builder.CardAction.imBack(session, "Services", "Services"),
-            builder.CardAction.imBack(session, "Maybe later", "Maybe later")
+            builder.CardAction.imBack(session, 'Services', 'Services'),
+            builder.CardAction.imBack(session, 'Maybe later', 'Maybe later')
           ])
         );
       session.send(otherServices);
     }
   ])
   .triggerAction({
-    matches: "WineBooking"
+    matches: 'WineBooking'
   });
 
 //End Greetings
 
 bot
-  .dialog("EndGreetings", [
+  .dialog('EndGreetings', [
     (session, args, next) => {
-      session.send("Thank you! Have a nice day!!");
+      session.send('Thank you! Have a nice day!!');
     }
   ])
   .triggerAction({
-    matches: "EndGreetings"
+    matches: 'EndGreetings'
   });
 
 // Spell Check
-if (process.env.IS_SPELL_CORRECTION_ENABLED === "true") {
+if (process.env.IS_SPELL_CORRECTION_ENABLED === 'true') {
   bot.use({
     botbuilder: (session, next) => {
       spellService
