@@ -5,12 +5,13 @@ const builder = require('botbuilder');
 const restify = require('restify');
 const Store = require('./store');
 const spellService = require('./spell-service');
-var nodemailer = require('nodemailer');
-var sgTransport = require('nodemailer-sendgrid-transport');
+const nodemailer = require('nodemailer');
+const sgTransport = require('nodemailer-sendgrid-transport');
 const handlebars = require('handlebars');
 const path = require('path');
 const config = require('./config');
 const fs = require('fs');
+const moment = require('moment');
 
 var options = {
   auth: {
@@ -108,7 +109,7 @@ bot
   .dialog('HasReference', [
     (session, args, next) => {
       var purpose = new builder.Message(session)
-        .text('Do you already have a reference ID?')
+        .text('Do you already have a booking reference ID?')
         .suggestedActions(
           builder.SuggestedActions.create(session, [
             builder.CardAction.imBack(
@@ -127,7 +128,6 @@ bot
       next({ args: session.message.text });
     },
     (session, results) => {
-      console.log('Results', results);
       if (results.args === 'Yes, I have a reference ID') {
         session.send('Please submit your reference ID');
       }
@@ -170,17 +170,28 @@ bot
               columns: [
                 {
                   type: 'Column',
-                  width: 2,
+                  size: 'auto',
+                  items: [
+                    {
+                      type: 'Image',
+                      size: 'medium',
+                      url: details[0].image
+                    }
+                  ]
+                },
+                {
+                  type: 'Column',
                   items: [
                     {
                       type: 'TextBlock',
-                      text: 'HOTEL BOOKING DETAILS',
+                      text: 'Hotel booking Details',
+                      size: 'medium',
                       weight: 'bolder'
                     },
                     {
                       type: 'TextBlock',
                       text: `Name - ${details[0].name}`,
-                      weight: 'bold',
+                      weight: 'bolder',
                       spacing: 'none'
                     },
                     {
@@ -196,18 +207,8 @@ bot
                     {
                       type: 'TextBlock',
                       text: `Hotel name - ${details[0].hotelName}`,
-                      size: 'small'
-                    }
-                  ]
-                },
-                {
-                  type: 'Column',
-                  width: 1,
-                  items: [
-                    {
-                      type: 'Image',
-                      url: details[0].image,
-                      size: 'auto'
+                      size: 'small',
+                      weight: 'bolder'
                     }
                   ]
                 }
@@ -401,17 +402,32 @@ bot
 bot
   .dialog('ConfirmBooking', [
     (session, args, next) => {
-      const ConfirmDialog = new builder.Message(session)
-        .text(`Do you want me to confirm booking on: ${session.message.text}?`)
-        .suggestedActions(
-          builder.SuggestedActions.create(session, [
-            builder.CardAction.imBack(session, 'Yes', 'Yes'),
-            builder.CardAction.imBack(session, 'No', 'No')
-          ])
-        );
-      userData.arrivalDate = session.message.text;
+     let dateArr = session.message.text.split('/');
+      let dateToCompare = new Date(
+        parseInt(dateArr[2]),
+        parseInt(dateArr[1]) - 1,
+        parseInt(dateArr[0])
+      );
+      // Date object for today
+      let today = new Date();
 
-      session.send(ConfirmDialog);
+      if (dateToCompare < today) {
+        session.send('Please enter a upcoming date!');
+      } else {
+        const ConfirmDialog = new builder.Message(session)
+          .text(
+            `Do you want me to confirm booking on: ${session.message.text}?`
+          )
+          .suggestedActions(
+            builder.SuggestedActions.create(session, [
+              builder.CardAction.imBack(session, 'Yes', 'Yes'),
+              builder.CardAction.imBack(session, 'No', 'No')
+            ])
+          );
+        userData.arrivalDate = session.message.text;
+
+        session.send(ConfirmDialog);
+      }
     }
   ])
   .triggerAction({
@@ -723,7 +739,7 @@ bot
         'Thanks a lot for your valuable time. Your booking has been done!!'
       );
       session.send(
-        `Click on the link below to access your confirmation details: \n${'https://www.rancelab.com/help/11-30-2012_resrvation%20confirmation.zoom97.png'}`
+        `Click on the link below to access your accommodation certification: \n${'https://res.cloudinary.com/dl7vudumd/image/upload/v1564554204/Screenshot_2019-07-31_at_11.26.31_AM.png'}`
       );
       var otherServices = new builder.Message(session)
         .text('Do you want to have a look at our other services?')
@@ -823,7 +839,6 @@ bot
         session.message.text === 'Sparkling wine' ||
         session.message.text === 'Rose wine'
       ) {
-
         userData.wineChoice = session.message.text;
         const wineLocation = new builder.Message(session)
           .text('Select one of the choices below:')
@@ -835,7 +850,7 @@ bot
             ])
           );
         session.send(wineLocation);
-      } else if (session.message.text === 'Wine'){
+      } else if (session.message.text === 'Wine') {
         const quantity = new builder.Message(session)
           .text('Please select your preferred quantity:')
           .suggestedActions(
@@ -845,29 +860,31 @@ bot
             ])
           );
         session.send(quantity);
-      } else{
+      } else {
         userData.wineOrigin = session.message.text;
-         Store.WineService(userData.wineChoice,userData.wineOrigin).then(wineItem => {
-        // args
-        let message = new builder.Message()
-          .attachmentLayout(builder.AttachmentLayout.carousel)
-          .attachments(
-            wineItem.map(wine => {
-              return new builder.HeroCard(session)
-                .title(`${wine.type}`)
-                .subtitle(`${wine.name} \n Age - ${wine.age}`)
-                .text(`Recommended - ${wine.recommended}`)
-                .images([builder.CardImage.create(session, wine.image)])
-                .buttons([
-                  builder.CardAction.imBack(session, wine.name, 'Buy now')
-                ]);
-            })
-          );
+        Store.WineService(userData.wineChoice, userData.wineOrigin).then(
+          wineItem => {
+            // args
+            let message = new builder.Message()
+              .attachmentLayout(builder.AttachmentLayout.carousel)
+              .attachments(
+                wineItem.map(wine => {
+                  return new builder.HeroCard(session)
+                    .title(`${wine.type}`)
+                    .subtitle(`${wine.name} \n Age - ${wine.age}`)
+                    .text(`Recommended - ${wine.recommended}`)
+                    .images([builder.CardImage.create(session, wine.image)])
+                    .buttons([
+                      builder.CardAction.imBack(session, wine.name, 'Buy now')
+                    ]);
+                })
+              );
 
-        session.send(message);
-        // End
-        session.endDialog();
-      });
+            session.send(message);
+            // End
+            session.endDialog();
+          }
+        );
       }
     }
   ])
@@ -957,7 +974,7 @@ bot
         'Your booking has been done. You`ll receive the order in the next 30 mins.'
       );
       session.send(
-        `Click on the link below to access your confirmation details: \n${'https://www.rancelab.com/help/11-30-2012_resrvation%20confirmation.zoom97.png'}`
+        `Click on the link below to access your accommodation certification: \n${'https://res.cloudinary.com/dl7vudumd/image/upload/v1564554204/Screenshot_2019-07-31_at_11.26.31_AM.png'}`
       );
       var otherServices = new builder.Message(session)
         .text('Do you want to have a look at our other services?')

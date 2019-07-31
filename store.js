@@ -667,7 +667,7 @@ const wine = [
   },
   {
     type: 'Rose wine',
-    country: 'Australia',
+    country: 'Australian',
     name: 'Castagna Allegro',
     image:
       'http://www.wineculture.com.au/media/catalog/product/cache/1/image/9df78eab33525d08d6e5fb8d27136e95/5/3/53719-6108.jpg',
@@ -676,7 +676,7 @@ const wine = [
   },
   {
     type: 'Rose wine',
-    country: 'Australia',
+    country: 'Australian',
     name: 'Logan Hannah',
     image:
       'https://images.wineselectors.com.au/media/products/LOGAN50917-main.png',
@@ -685,7 +685,7 @@ const wine = [
   },
   {
     type: 'Rose wine',
-    country: 'Australia',
+    country: 'Australian',
     name: 'La Prova Aglianico Rosato',
     age: '20 years',
     image:
@@ -806,7 +806,7 @@ const bookingReferenceDetails = [
       duration: '3 days',
       roomType: 'sea-view',
       image:
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZbks_VBsZiJI93-Be_iMelAaJ68Jbn4koUVC0SmBgUZOmwFTyhA',
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/User_icon_2.svg/220px-User_icon_2.svg.png',
       hotelName: 'Constance Belle Mare Plage',
       location: 'Mauritius'
     }
@@ -817,7 +817,7 @@ const bookingReferenceDetails = [
       duration: '2 days 1 Night',
       roomType: 'city-view',
       image:
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTf3jAS31LhCA6yssSIoswj8yKxdAOZb23hHFd--isjuCb2NC54Lw',
+        'https://d1nhio0ox7pgb.cloudfront.net/_img/o_collection_png/green_dark_grey/512x512/plain/user.png',
       hotelName: 'Constance Prince Maurice',
       location: 'Mauritius'
     }
@@ -828,7 +828,7 @@ const bookingReferenceDetails = [
       duration: '4 days',
       roomType: 'deluxe',
       image:
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSkS9mYMsnJzmMlrRWyLN_-2GHOLaD90A66nz2rcICgy0zmgbUE',
+        'https://images.onlinelabels.com/images/clip-art/dagobert83/dagobert83_female_user_icon.png',
       hotelName: 'Constance Aiyana Pemba',
       location: 'Zanzibar'
     }
@@ -840,7 +840,7 @@ const bookingReferenceDetails = [
       roomType: 'single',
       hotelName: 'Constance Moofushi',
       image:
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ0uWxfWde2XcqambSuJmsNS13OmXqRTS3vJD4p_Ya6EGy2VXjs',
+        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRoK5mOFkiYZeUbLVW-djP1AuFGZBHDB92SWxBcVm6TIsEC38-X',
       location: 'Maldives'
     }
   ],
@@ -851,7 +851,7 @@ const bookingReferenceDetails = [
       roomType: 'sea-view',
       hotelName: 'Constance Tsarabanjina ',
       image:
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ0uWxfWde2XcqambSuJmsNS13OmXqRTS3vJD4p_Ya6EGy2VXjs',
+        'http://icons.iconarchive.com/icons/visualpharm/must-have/256/User-icon.png',
       location: 'Madagascar'
     }
   ]
@@ -989,8 +989,6 @@ const GolfService = () => {
 };
 
 const WineService = (typeOfWine, wineOrigin) => {
-  console.log('typeOfWine', typeOfWine);
-  console.log('wineOrigin', wineOrigin);
   return new Promise((resolve, reject) => {
     // Filling the hotels results manually just for demo purposes
     let userWineChoice = [];
