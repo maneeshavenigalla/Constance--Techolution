@@ -157,66 +157,15 @@ bot
     session.send(message);
 
     Store.hotelReferenceDetails().then(details => {
-      const msg = new builder.Message(session).addAttachment({
-        contentType: 'application/vnd.microsoft.card.adaptive',
-        content: {
-          type: 'AdaptiveCard',
-          speak:
-            "<s>Your  meeting about \"Adaptive Card design session\"<break strength='weak'/> is starting at 12:30pm</s><s>Do you want to snooze <break strength='weak'/> or do you want to send a late notification to the attendees?</s>",
-
-          body: [
-            {
-              type: 'ColumnSet',
-              columns: [
-                {
-                  type: 'Column',
-                  size: 'auto',
-                  items: [
-                    {
-                      type: 'Image',
-                      size: 'medium',
-                      url: details[0].image
-                    }
-                  ]
-                },
-                {
-                  type: 'Column',
-                  items: [
-                    {
-                      type: 'TextBlock',
-                      text: 'Hotel booking Details',
-                      size: 'medium',
-                      weight: 'bolder'
-                    },
-                    {
-                      type: 'TextBlock',
-                      text: `Name - ${details[0].name}`,
-                      weight: 'bolder',
-                      spacing: 'none'
-                    },
-                    {
-                      type: 'TextBlock',
-                      text: `Duration - ${details[0].duration}`,
-                      size: 'small'
-                    },
-                    {
-                      type: 'TextBlock',
-                      text: `Room type - ${details[0].roomType}`,
-                      size: 'small'
-                    },
-                    {
-                      type: 'TextBlock',
-                      text: `Hotel name - ${details[0].hotelName}`,
-                      size: 'small',
-                      weight: 'bolder'
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        }
-      });
+      const msg = new builder.Message(session);
+      msg.attachmentLayout(builder.AttachmentLayout.carousel)
+      msg.attachments([
+          new builder.HeroCard(session)
+              .title(`Hotel booking Details`)
+              .subtitle(`Name - ${details[0].name} \n Duration - ${details[0].duration}`)
+              .text(`Room type - ${details[0].roomType} \n Hotel name - ${details[0].hotelName}`)
+              .images([builder.CardImage.create(session, details[0].image)])
+      ]);
 
       session.send(msg);
 
