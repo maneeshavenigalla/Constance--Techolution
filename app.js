@@ -158,13 +158,19 @@ bot
 
     Store.hotelReferenceDetails().then(details => {
       const msg = new builder.Message(session);
-      msg.attachmentLayout(builder.AttachmentLayout.carousel)
+      msg.attachmentLayout(builder.AttachmentLayout.carousel);
       msg.attachments([
-          new builder.HeroCard(session)
-              .title(`Hotel booking Details`)
-              .subtitle(`Name - ${details[0].name} \n Duration - ${details[0].duration}`)
-              .text(`Room type - ${details[0].roomType} \n Hotel name - ${details[0].hotelName}`)
-              .images([builder.CardImage.create(session, details[0].image)])
+        new builder.HeroCard(session)
+          .title(`Hotel booking Details`)
+          .subtitle(
+            `Name - ${details[0].name} \n Duration - ${details[0].duration}`
+          )
+          .text(
+            `Room type - ${details[0].roomType} \n Hotel name - ${
+              details[0].hotelName
+            }`
+          )
+          .images([builder.CardImage.create(session, details[0].image)])
       ]);
 
       session.send(msg);
@@ -351,7 +357,7 @@ bot
 bot
   .dialog('ConfirmBooking', [
     (session, args, next) => {
-     let dateArr = session.message.text.split('/');
+      let dateArr = session.message.text.split('/');
       let dateToCompare = new Date(
         parseInt(dateArr[2]),
         parseInt(dateArr[1]) - 1,
@@ -461,25 +467,25 @@ bot
 bot
   .dialog('FlightDetails', [
     (session, args, next) => {
-      if (session.message.text === 'No, thank you') {
+      if (session.message.text === 'No, thank you' || session.message.text === 'ok') {
         const servicesOpted = new builder.Message(session)
           .text('Do you want to look at the services provided?')
           .suggestedActions(
             builder.SuggestedActions.create(session, [
-              builder.CardAction.imBack(session, 'Services', 'Services'),
+              builder.CardAction.imBack(session, 'Services', 'Yes, please'),
               builder.CardAction.imBack(session, 'Maybe later', 'Maybe later')
             ])
           );
         session.send(servicesOpted);
       } else {
         session.send(
-          `Kindly send your flight details to support@constance.com. A limo with number 1234 shall be arranged for you.`
+          `Kindly send your flight details to support@constance.com. Limo with number 1234 shall be arranged for you.`
         );
         const servicesOpted = new builder.Message(session)
           .text('Do you want to look at the services provided?')
           .suggestedActions(
             builder.SuggestedActions.create(session, [
-              builder.CardAction.imBack(session, 'Services', 'Services'),
+              builder.CardAction.imBack(session, 'Services', 'Yes please'),
               builder.CardAction.imBack(session, 'Maybe later', 'Maybe later')
             ])
           );
@@ -685,10 +691,10 @@ bot
     },
     (session, results) => {
       session.send(
-        'Thanks a lot for your valuable time. Your booking has been done!!'
+        'Your booking has been done!! We are looking forward for you.'
       );
       session.send(
-        `Click on the link below to access your accommodation certification: \n${'https://res.cloudinary.com/dl7vudumd/image/upload/v1564554204/Screenshot_2019-07-31_at_11.26.31_AM.png'}`
+        `Click on the link below to access your booking reciept: \n${'https://res.cloudinary.com/dl7vudumd/image/upload/v1564554204/Constance_reciept.png'}`
       );
       var otherServices = new builder.Message(session)
         .text('Do you want to have a look at our other services?')
@@ -809,36 +815,42 @@ bot
             ])
           );
         session.send(quantity);
-      } else {
-        userData.wineOrigin = session.message.text;
-        Store.WineService(userData.wineChoice, userData.wineOrigin).then(
-          wineItem => {
-            // args
-            let message = new builder.Message()
-              .attachmentLayout(builder.AttachmentLayout.carousel)
-              .attachments(
-                wineItem.map(wine => {
-                  return new builder.HeroCard(session)
-                    .title(`${wine.type}`)
-                    .subtitle(`${wine.name} \n Age - ${wine.age}`)
-                    .text(`Recommended - ${wine.recommended}`)
-                    .images([builder.CardImage.create(session, wine.image)])
-                    .buttons([
-                      builder.CardAction.imBack(session, wine.name, 'Buy now')
-                    ]);
-                })
-              );
-
-            session.send(message);
-            // End
-            session.endDialog();
-          }
-        );
       }
     }
   ])
   .triggerAction({
     matches: 'Wine'
+  });
+
+//Types of wines
+
+bot
+  .dialog('WineTypes', (session, args, next) => {
+    userData.wineOrigin = session.message.text;
+    Store.WineService(userData.wineChoice, userData.wineOrigin).then(
+      wineItem => {
+        // args
+        let message = new builder.Message()
+          .attachmentLayout(builder.AttachmentLayout.carousel)
+          .attachments(
+            wineItem.map(wine => {
+              return new builder.HeroCard(session)
+                .title(`${wine.type}`)
+                .subtitle(`${wine.name} \n Age - ${wine.age}`)
+                .text(`Recommended - ${wine.recommended}`)
+                .images([builder.CardImage.create(session, wine.image)])
+                .buttons([
+                  builder.CardAction.imBack(session, wine.name, 'Buy now')
+                ]);
+            })
+          );
+
+        session.send(message);
+      }
+    );
+  })
+  .triggerAction({
+    matches: 'WineTypes'
   });
 
 //Wine Booking
@@ -920,10 +932,10 @@ bot
     },
     (session, results) => {
       session.send(
-        'Your booking has been done. You`ll receive the order in the next 30 mins.'
+        'Your booking has been done. You`ll receive the order in the next 30 mins. Kindly show your age proof during the delivery. '
       );
       session.send(
-        `Click on the link below to access your accommodation certification: \n${'https://res.cloudinary.com/dl7vudumd/image/upload/v1564554204/Screenshot_2019-07-31_at_11.26.31_AM.png'}`
+        `Click on the link below to access your booking reciept: \n${'https://res.cloudinary.com/dl7vudumd/image/upload/v1564659223/wine-reciept.png'}`
       );
       var otherServices = new builder.Message(session)
         .text('Do you want to have a look at our other services?')
