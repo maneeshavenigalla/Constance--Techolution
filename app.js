@@ -947,7 +947,7 @@ bot
         'Your booking has been done. You`ll receive the order in the next 30 mins. Kindly show your age proof during the delivery. '
       );
       session.send(
-        `Click on the link below to access your booking reciept: \n${'https://res.cloudinary.com/dl7vudumd/image/upload/v1564659223/wine-reciept.png'}`
+        `Click on the link below to access your booking reciept: \n${'https://res.cloudinary.com/dl7vudumd/image/upload/v1564740020/wine.png'}`
       );
       var otherServices = new builder.Message(session)
         .text('Do you want to have a look at our other services?')
