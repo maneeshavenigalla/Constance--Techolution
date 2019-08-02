@@ -194,6 +194,17 @@ bot
     matches: 'Reference'
   });
 
+
+  //Invalid reference
+
+  bot.dialog("InvalidReference",(session,args,next) =>{
+    session.send("Enter a valid value: ");
+    // session.send("Reference ID can contain only alphanumeric characters ");
+
+  }).triggerAction({
+    matches: "InvalidReference"
+  })
+
 //Purpose of the trip
 
 bot
@@ -332,7 +343,8 @@ bot
 bot
   .dialog('NumberOfDays', [
     (session, args, next) => {
-      session.send('Can you enter the duration of your stay?');
+      session.send('Can you enter the duration of your stay in N/D format?');
+      session.send("Eg: 2N/3D")
     }
   ])
   .triggerAction({
