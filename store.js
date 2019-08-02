@@ -813,6 +813,28 @@ const bookingReferenceDetails = [
   ],
   [
     {
+      name: 'Olivia',
+      duration: '21 days',
+      roomType: 'single',
+      image:
+        'https://www.bilingolinos-kita.eu/wp-content/uploads/2018/06/user-310807_640.png',
+      hotelName: 'Constance Prince Maurice',
+      location: 'Mauritius'
+    }
+  ],
+  [
+    {
+      name: 'Noah',
+      duration: '4 nights',
+      roomType: 'single',
+      image:
+        'https://png.pngtree.com/png-vector/20190625/ourlarge/pngtree-business-male-user-avatar-vector-png-image_1511454.jpg',
+      hotelName: 'Constance Tsarabanjina ',
+      location: 'Madagascar'
+    }
+  ],
+  [
+    {
       name: 'Ruby',
       duration: '2 days 1 Night',
       roomType: 'city-view',
@@ -846,6 +868,17 @@ const bookingReferenceDetails = [
   ],
   [
     {
+      name: 'Ethan',
+      duration: '5 nights',
+      roomType: 'deluxe',
+      image:
+        'https://cdn.pixabay.com/photo/2017/07/18/23/23/user-2517433_960_720.png',
+      hotelName: 'Constance Moofushi',
+      location: 'Maldives'
+    }
+  ],
+  [
+    {
       name: 'Harry',
       duration: '4 days',
       roomType: 'sea-view',
@@ -853,6 +886,28 @@ const bookingReferenceDetails = [
       image:
         'http://icons.iconarchive.com/icons/visualpharm/must-have/256/User-icon.png',
       location: 'Madagascar'
+    }
+  ],
+  [
+    {
+      name: 'William',
+      duration: '9 days',
+      roomType: 'city-view',
+      hotelName: 'Constance Aiyana Pemba',
+      image:
+        'http://icons.iconarchive.com/icons/visualpharm/must-have/256/User-icon.png',
+      location: 'Zanzibar'
+    }
+  ],
+  [
+    {
+      name: 'William',
+      duration: '9 days',
+      roomType: 'city-view',
+      hotelName: 'Constance Belle Mare Plage',
+      image:
+        'http://icons.iconarchive.com/icons/visualpharm/must-have/256/User-icon.png',
+      location: 'Mauritius'
     }
   ]
 ];
