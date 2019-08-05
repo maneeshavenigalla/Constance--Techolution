@@ -617,7 +617,6 @@ bot
 bot
   .dialog('NoOfIndividuals', [
     (session, args, next) => {
-      console.log("blahahhshdaj",session.message.text)
       if (session.message.text === 'Book Table') {
         if (session.message && session.message.value) {
           function processSubmitAction(session, value) {
@@ -680,40 +679,20 @@ bot
                         style: 'compact',
                         choices: [
                           {
-                            title: 'Breakfast',
+                            title: 'Breakfast (7-9) AM',
                             value: 'Breakfast',
                             isSelected: true
                           },
                           {
-                            title: 'Lunch',
+                            title: 'Lunch (12-4)PM',
                             value: 'Lunch'
                           },
                           {
-                            title: 'Dinner',
+                            title: 'Dinner (7-11)PM',
                             value: 'Dinner'
                           }
                         ]
                       },
-                      {
-                        type: 'Input.ChoiceSet',
-                        id: 'foodTimings',
-                        style: 'compact',
-                        choices: [
-                          {
-                            title: '(7-9) AM',
-                            value: '(7-9) AM',
-                            isSelected: true
-                          },
-                          {
-                            title: '(12-4)PM',
-                            value: '(12-4)PM'
-                          },
-                          {
-                            title: '(7-11)PM',
-                            value: '(7-11)PM'
-                          }
-                        ]
-                      }
                     ]
                   }
                 ]
@@ -837,11 +816,12 @@ bot
       }
     },
     (session, results) => {
+      console.log("golf", session.message.text)
       session.send(
         'Your booking has been done!! We are looking forward for you.'
       );
       session.send(
-        `Click on the link below to access your booking reciept: \n${'https://res.cloudinary.com/dl7vudumd/image/upload/v1564554204/Constance_reciept.png'}`
+        `Click on the link below to access your booking reciept: \n${'https://res.cloudinary.com/dl7vudumd/image/upload/v1564865928/golf_constance.png'}`
       );
       var otherServices = new builder.Message(session)
         .text('Do you want to have a look at our other services?')
@@ -1089,7 +1069,7 @@ bot
         'Your booking has been done. You`ll receive the order in the next 30 mins. Kindly show your age proof during the delivery. '
       );
       session.send(
-        `Click on the link below to access your booking reciept: \n${'https://res.cloudinary.com/dl7vudumd/image/upload/v1564740020/wine.png'}`
+        `Click on the link below to access your booking reciept: \n${'https://res.cloudinary.com/dl7vudumd/image/upload/v1564865928/wine_constance.png'}`
       );
       var otherServices = new builder.Message(session)
         .text('Do you want to have a look at our other services?')
