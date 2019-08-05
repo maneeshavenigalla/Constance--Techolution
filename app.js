@@ -531,6 +531,7 @@ bot
 bot
   .dialog('Restaurants', [
     (session, args, next) => {
+      userData.userChoice = "Restaurant"
       // Async search
       Store.searchRestaurants().then(restaurant => {
         // args
@@ -820,9 +821,16 @@ bot
       session.send(
         'Your booking has been done!! We are looking forward for you.'
       );
-      session.send(
-        `Click on the link below to access your booking reciept: \n${'https://res.cloudinary.com/dl7vudumd/image/upload/v1564865928/golf_constance.png'}`
-      );
+      if(userData.userChoice === "Golf"){
+        session.send(
+          `Click on the link below to access your booking reciept: \n${'https://res.cloudinary.com/dl7vudumd/image/upload/v1564865928/golf_constance.png'}`
+        );
+      }
+      else{
+        session.send(
+          `Click on the link below to access your booking reciept: \n${'https://res.cloudinary.com/dl7vudumd/image/upload/v1564988428/res_constance.png'}`
+        );
+      }
       var otherServices = new builder.Message(session)
         .text('Do you want to have a look at our other services?')
         .suggestedActions(
@@ -856,6 +864,7 @@ bot
 bot
   .dialog('Golf', [
     (session, args, next) => {
+      userData.userChoice = "Golf"
       Store.GolfService().then(golfItem => {
         // args
         let message = new builder.Message()
@@ -905,6 +914,7 @@ bot
         session.message.text === 'Bottle'
       ) {
         userData.wineQuantity = session.message.text;
+
         const typeOfWine = new builder.Message(session)
           .text('Please select your choice:')
           .suggestedActions(
