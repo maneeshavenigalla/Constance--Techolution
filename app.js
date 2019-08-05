@@ -125,12 +125,6 @@ bot
           ])
         );
       session.send(purpose);
-      next({ args: session.message.text });
-    },
-    (session, results) => {
-      if (results.args === 'Yes, I have a reference ID') {
-        session.send('Please submit your reference ID');
-      }
     }
   ])
   .triggerAction({
@@ -176,7 +170,7 @@ bot
       session.send(msg);
 
       const transportation = new builder.Message(session)
-        .text('Do you want to have a look at our private transfer facility?')
+        .text('Do you want to have a look at our private limo service?')
         .suggestedActions(
           builder.SuggestedActions.create(session, [
             builder.CardAction.imBack(
@@ -194,16 +188,16 @@ bot
     matches: 'Reference'
   });
 
+//Invalid reference
 
-  //Invalid reference
-
-  bot.dialog("InvalidReference",(session,args,next) =>{
-    session.send("Enter a valid value: ");
+bot
+  .dialog('InvalidReference', (session, args, next) => {
+    session.send('Enter a valid value: ');
     // session.send("Reference ID can contain only alphanumeric characters ");
-
-  }).triggerAction({
-    matches: "InvalidReference"
   })
+  .triggerAction({
+    matches: 'InvalidReference'
+  });
 
 //Purpose of the trip
 
@@ -344,7 +338,7 @@ bot
   .dialog('NumberOfDays', [
     (session, args, next) => {
       session.send('Can you enter the duration of your stay in N/D format?');
-      session.send("Eg: 2N/3D")
+      session.send('Eg: 2N/3D');
     }
   ])
   .triggerAction({
@@ -479,7 +473,10 @@ bot
 bot
   .dialog('FlightDetails', [
     (session, args, next) => {
-      if (session.message.text === 'No, thank you' || session.message.text === 'ok') {
+      if (
+        session.message.text === 'No, thank you' ||
+        session.message.text === 'ok'
+      ) {
         const servicesOpted = new builder.Message(session)
           .text('Do you want to look at the services provided?')
           .suggestedActions(
@@ -620,86 +617,224 @@ bot
 bot
   .dialog('NoOfIndividuals', [
     (session, args, next) => {
-      if (session.message && session.message.value) {
-        function processSubmitAction(session, value) {
-          var defaultErrorMessage = 'Please enter a value';
-          if (!value.noGuests) {
-            session.send(defaultErrorMessage);
-            return false;
-          } else {
-            return true;
+      console.log("blahahhshdaj",session.message.text)
+      if (session.message.text === 'Book Table') {
+        if (session.message && session.message.value) {
+          function processSubmitAction(session, value) {
+            var defaultErrorMessage = 'Please enter a value';
+            if (!value.noGuests) {
+              session.send(defaultErrorMessage);
+              return false;
+            } else {
+              return true;
+            }
           }
+          // A Card's Submit Action obj was received
+          if (processSubmitAction(session, session.message.value)) {
+            next(session.message.value);
+          }
+          return;
         }
-        // A Card's Submit Action obj was received
-        if (processSubmitAction(session, session.message.value)) {
-          next(session.message.value);
-        }
-        return;
-      }
-      // Display Welcome card with Hotels and Flights search options
-      var card = {
-        contentType: 'application/vnd.microsoft.card.adaptive',
-        content: {
-          $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
-          type: 'AdaptiveCard',
-          version: '1.0',
-          body: [
-            {
-              type: 'ColumnSet',
-              columns: [
-                {
-                  type: 'Column',
-                  width: 2,
-                  items: [
-                    {
-                      type: 'TextBlock',
-                      text: 'Please fill the following details:',
-                      weight: 'bolder',
-                      size: 'medium'
-                    },
-                    {
-                      type: 'TextBlock',
-                      text: 'Number of Individuals'
-                    },
-                    {
-                      type: 'Input.Number',
-                      id: 'noGuests',
-                      placeholder: 'Please enter a value'
-                    },
-                    {
-                      type: 'TextBlock',
-                      text: 'Please enter your booking date'
-                    },
-                    {
-                      type: 'Input.Date',
-                      id: 'bookingDate',
-                      placeholder: 'Please enter a value'
-                    },
-                    {
-                      type: 'TextBlock',
-                      text: 'Please enter your booking time'
-                    },
-                    {
-                      type: 'Input.Time',
-                      id: 'bookingTime',
-                      placeholder: 'Please enter a value'
-                    }
-                  ]
-                }
-              ]
-            }
-          ],
-          actions: [
-            {
-              type: 'Action.Submit',
-              title: 'Submit'
-            }
-          ]
-        }
-      };
+        // Display Welcome card with Hotels and Flights search options
+        var card = {
+          contentType: 'application/vnd.microsoft.card.adaptive',
+          content: {
+            $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
+            type: 'AdaptiveCard',
+            version: '1.0',
+            body: [
+              {
+                type: 'ColumnSet',
+                columns: [
+                  {
+                    type: 'Column',
+                    width: 2,
+                    items: [
+                      {
+                        type: 'TextBlock',
+                        text: 'Please fill the following details:',
+                        weight: 'bolder',
+                        size: 'medium'
+                      },
+                      {
+                        type: 'TextBlock',
+                        text: 'Number of Individuals'
+                      },
+                      {
+                        type: 'Input.Number',
+                        id: 'noGuests',
+                        placeholder: 'Please enter a value'
+                      },
+                      {
+                        type: 'TextBlock',
+                        text: 'Please enter your booking date'
+                      },
+                      {
+                        type: 'Input.Date',
+                        id: 'bookingDate',
+                        placeholder: 'Please enter a value'
+                      },
+                      {
+                        type: 'Input.ChoiceSet',
+                        id: 'food',
+                        style: 'compact',
+                        choices: [
+                          {
+                            title: 'Breakfast',
+                            value: 'Breakfast',
+                            isSelected: true
+                          },
+                          {
+                            title: 'Lunch',
+                            value: 'Lunch'
+                          },
+                          {
+                            title: 'Dinner',
+                            value: 'Dinner'
+                          }
+                        ]
+                      },
+                      {
+                        type: 'Input.ChoiceSet',
+                        id: 'foodTimings',
+                        style: 'compact',
+                        choices: [
+                          {
+                            title: '(7-9) AM',
+                            value: '(7-9) AM',
+                            isSelected: true
+                          },
+                          {
+                            title: '(12-4)PM',
+                            value: '(12-4)PM'
+                          },
+                          {
+                            title: '(7-11)PM',
+                            value: '(7-11)PM'
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            actions: [
+              {
+                type: 'Action.Submit',
+                title: 'Submit'
+              }
+            ]
+          }
+        };
 
-      var msg = new builder.Message(session).addAttachment(card);
-      session.send(msg);
+        var msg = new builder.Message(session).addAttachment(card);
+        session.send(msg);
+      }
+      else {
+        if (session.message && session.message.value) {
+          function processSubmitAction(session, value) {
+            var defaultErrorMessage = 'Please enter a value';
+            if (!value.noGuests) {
+              session.send(defaultErrorMessage);
+              return false;
+            } else {
+              return true;
+            }
+          }
+          // A Card's Submit Action obj was received
+          if (processSubmitAction(session, session.message.value)) {
+            next(session.message.value);
+          }
+          return;
+        }
+        var card = {
+          contentType: 'application/vnd.microsoft.card.adaptive',
+          content: {
+            $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
+            type: 'AdaptiveCard',
+            version: '1.0',
+            body: [
+              {
+                type: 'ColumnSet',
+                columns: [
+                  {
+                    type: 'Column',
+                    width: 2,
+                    items: [
+                      {
+                        type: 'TextBlock',
+                        text: 'Please fill the following details:',
+                        weight: 'bolder',
+                        size: 'medium'
+                      },
+                      {
+                        type: 'TextBlock',
+                        text: 'Number of Individuals'
+                      },
+                      {
+                        type: 'Input.Number',
+                        id: 'noGuests',
+                        placeholder: 'Please enter a value'
+                      },
+                      {
+                        type: 'TextBlock',
+                        text: 'Please enter your booking date'
+                      },
+                      {
+                        type: 'Input.Date',
+                        id: 'bookingDate',
+                        placeholder: 'Please enter a value'
+                      },
+                      {
+                        type: 'Input.ChoiceSet',
+                        id: 'golfTimings',
+                        style: 'compact',
+                        choices: [
+                          {
+                            title: '(7-10) AM',
+                            value: '(7-10) AM',
+                            isSelected: true
+                          },
+                          {
+                            title: '(8-11)AM',
+                            value: '(12-4)AM'
+                          },
+                          {
+                            title: '(11-1)AM',
+                            value: '(11-1)AM'
+                          },
+                          {
+                            title: '(1-4)PM',
+                            value: '(1-4)PM'
+                          },
+                          {
+                            title: '(2-5)PM',
+                            value: '(2-5)PM'
+                          },
+                          {
+                            title: '(5-8)PM',
+                            value: '(5-8)PM'
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            actions: [
+              {
+                type: 'Action.Submit',
+                title: 'Submit'
+              }
+            ]
+          }
+        };
+
+        var msg = new builder.Message(session).addAttachment(card);
+        session.send(msg);
+      }
     },
     (session, results) => {
       session.send(
@@ -761,7 +896,11 @@ bot
                 )
                 .images([builder.CardImage.create(session, golf.image)])
                 .buttons([
-                  builder.CardAction.imBack(session, 'Book now', 'Book now')
+                  builder.CardAction.imBack(
+                    session,
+                    'Private Golf Resort',
+                    'Book now'
+                  )
                 ]);
             })
           );
@@ -785,6 +924,7 @@ bot
         session.message.text === 'Glass' ||
         session.message.text === 'Bottle'
       ) {
+        userData.wineQuantity = session.message.text;
         const typeOfWine = new builder.Message(session)
           .text('Please select your choice:')
           .suggestedActions(
@@ -909,12 +1049,14 @@ bot
                     },
                     {
                       type: 'TextBlock',
-                      text: 'Please enter number of units:'
+                      text: `Please enter number of ${userData.wineQuantity}s:`
                     },
                     {
                       type: 'Input.Number',
                       id: 'noUnits',
-                      placeholder: 'Please enter number of units'
+                      placeholder: `Please enter number of ${
+                        userData.wineQuantity
+                      }s:`
                     },
                     {
                       type: 'TextBlock',
