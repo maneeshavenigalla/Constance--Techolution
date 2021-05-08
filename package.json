@@ -28,7 +28,7 @@
     "child_process": "^1.0.2",
     "dotenv-extended": "^1.0.4",
     "downloadjs": "^1.4.7",
-    "handlebars": "^4.1.2",
+    "handlebars": "^4.7.7",
     "image-downloader": "^3.4.2",
     "moment": "^2.24.0",
     "nodemailer": "^6.2.1",
